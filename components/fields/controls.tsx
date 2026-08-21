@@ -1,9 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { CloudUploadIcon, StarIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Calendar03Icon,
+  CloudUploadIcon,
+  StarIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import {
+  addDays,
+  addMonths,
+  format,
+  isSameDay,
+  isSameMonth,
+  isToday,
+  parseISO,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/icon";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function AppleRadio({
   checked,
@@ -21,7 +44,7 @@ export function AppleRadio({
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-all duration-150",
+        "ff-choice-row flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-150",
         checked
           ? "border-[var(--ff-primary,#007AFF)] bg-[color-mix(in_srgb,var(--ff-primary,#007AFF)_8%,transparent)]"
           : "border-[#D2D2D7] bg-white hover:border-[#B0B0B5] dark:border-white/10 dark:bg-white/5",
@@ -51,7 +74,9 @@ export function AppleRadio({
         disabled={disabled}
         onChange={onChange}
       />
-      <span className="text-[15px] text-[#1D1D1F] dark:text-white">{label}</span>
+      <span className="ff-choice-label text-[15px] text-[#1D1D1F] dark:text-white">
+        {label}
+      </span>
     </label>
   );
 }
@@ -70,7 +95,7 @@ export function AppleCheckbox({
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-all duration-150",
+        "ff-choice-row flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-150",
         checked
           ? "border-[var(--ff-primary,#007AFF)] bg-[color-mix(in_srgb,var(--ff-primary,#007AFF)_8%,transparent)]"
           : "border-[#D2D2D7] bg-white hover:border-[#B0B0B5] dark:border-white/10 dark:bg-white/5",
@@ -94,7 +119,9 @@ export function AppleCheckbox({
         disabled={disabled}
         onChange={(event) => onChange?.(event.target.checked)}
       />
-      <span className="text-[15px] text-[#1D1D1F] dark:text-white">{label}</span>
+      <span className="ff-choice-label text-[15px] text-[#1D1D1F] dark:text-white">
+        {label}
+      </span>
     </label>
   );
 }
@@ -143,6 +170,116 @@ export function StarRating({
   );
 }
 
+export function DatePicker({
+  value,
+  placeholder = "Pick a date",
+  onChange,
+  disabled,
+}: {
+  value?: string;
+  placeholder?: string;
+  onChange?: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const selected = value ? parseISO(value) : undefined;
+  const [open, setOpen] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    startOfMonth(selected && !Number.isNaN(selected.getTime()) ? selected : new Date())
+  );
+  const gridStart = startOfWeek(startOfMonth(visibleMonth));
+  const days = Array.from({ length: 42 }, (_, index) => addDays(gridStart, index));
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            disabled={disabled}
+            className="ff-input flex items-center justify-between text-left disabled:pointer-events-none"
+          />
+        }
+      >
+        <span className={value ? "" : "text-[#86868B]"}>
+          {selected && !Number.isNaN(selected.getTime())
+            ? format(selected, "MMM d, yyyy")
+            : placeholder}
+        </span>
+        <Icon icon={Calendar03Icon} size={17} className="text-[#86868B]" />
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        className="w-[296px] gap-3 rounded-2xl border border-[#E5E5EA] bg-white p-3 text-[#1D1D1F] shadow-[0_16px_40px_rgba(0,0,0,0.14)] ring-0"
+      >
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setVisibleMonth((month) => addMonths(month, -1))}
+            className="grid size-8 place-items-center rounded-[8px] text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]"
+            aria-label="Previous month"
+          >
+            <Icon icon={ArrowLeft01Icon} size={15} />
+          </button>
+          <p className="text-[13px] font-medium">{format(visibleMonth, "MMMM yyyy")}</p>
+          <button
+            type="button"
+            onClick={() => setVisibleMonth((month) => addMonths(month, 1))}
+            className="grid size-8 place-items-center rounded-[8px] text-[#86868B] hover:bg-[#F5F5F7] hover:text-[#1D1D1F]"
+            aria-label="Next month"
+          >
+            <Icon icon={ArrowRight01Icon} size={15} />
+          </button>
+        </div>
+        <div className="grid grid-cols-7 text-center text-[11px] text-[#86868B]">
+          {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+            <span key={day} className="py-1">
+              {day}
+            </span>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-0.5">
+          {days.map((day) => {
+            const active = selected ? isSameDay(day, selected) : false;
+            return (
+              <button
+                key={day.toISOString()}
+                type="button"
+                onClick={() => {
+                  onChange?.(format(day, "yyyy-MM-dd"));
+                  setOpen(false);
+                }}
+                className={cn(
+                  "grid size-9 place-items-center rounded-[9px] text-[12px] transition-colors",
+                  !isSameMonth(day, visibleMonth) && "text-[#C7C7CC]",
+                  isToday(day) && !active && "bg-[#F5F5F7] font-medium",
+                  active
+                    ? "bg-[var(--ff-primary,#007AFF)] text-white"
+                    : "hover:bg-[#F5F5F7]"
+                )}
+              >
+                {format(day, "d")}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const today = new Date();
+            onChange?.(format(today, "yyyy-MM-dd"));
+            setVisibleMonth(startOfMonth(today));
+            setOpen(false);
+          }}
+          className="h-8 rounded-[8px] bg-[#F5F5F7] text-[12px] text-[#007AFF] hover:bg-[#EEEEF0]"
+        >
+          Today
+        </button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function FileDropzone({
   value,
   accept,
@@ -174,7 +311,7 @@ export function FileDropzone({
         takeFile(event.dataTransfer.files[0]);
       }}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-all duration-150",
+        "ff-file-drop flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-5 py-8 text-center transition-all duration-150",
         dragging
           ? "border-[var(--ff-primary,#007AFF)] bg-[color-mix(in_srgb,var(--ff-primary,#007AFF)_8%,transparent)]"
           : "border-[#D2D2D7] bg-[#FAFAFA] hover:border-[#B0B0B5] dark:border-white/15 dark:bg-white/5",

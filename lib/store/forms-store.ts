@@ -2,7 +2,12 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createBlankForm, createDemoForm, cloneSnapshot } from "@/lib/constants";
+import {
+  cloneSnapshot,
+  createBlankForm,
+  createDemoForm,
+  normalizeFormDocument,
+} from "@/lib/constants";
 import { createId } from "@/lib/id";
 import type { FormDocument, FormVersion } from "@/lib/types";
 
@@ -25,7 +30,10 @@ export const useFormsStore = create<FormsState>()(
       forms: [createDemoForm()],
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
-      getForm: (id) => get().forms.find((form) => form.id === id),
+      getForm: (id) => {
+        const form = get().forms.find((item) => item.id === id);
+        return form ? normalizeFormDocument(form) : undefined;
+      },
       createForm: (title) => {
         const form = createBlankForm(title);
         set((state) => ({ forms: [form, ...state.forms] }));
@@ -33,10 +41,11 @@ export const useFormsStore = create<FormsState>()(
       },
       upsertForm: (form) =>
         set((state) => {
+          const normalized = normalizeFormDocument(form);
           const index = state.forms.findIndex((item) => item.id === form.id);
-          if (index === -1) return { forms: [form, ...state.forms] };
+          if (index === -1) return { forms: [normalized, ...state.forms] };
           const next = [...state.forms];
-          next[index] = form;
+          next[index] = normalized;
           return { forms: next };
         }),
       deleteForm: (id) => {
@@ -87,7 +96,15 @@ export const useFormsStore = create<FormsState>()(
     }),
     {
       name: "formforge:forms",
+      version: 2,
       partialize: (state) => ({ forms: state.forms }),
+      migrate: (persistedState) => {
+        const persisted = persistedState as { forms?: FormDocument[] };
+        return {
+          ...persisted,
+          forms: (persisted.forms ?? []).map(normalizeFormDocument),
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

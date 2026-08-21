@@ -5,10 +5,12 @@ import { immer } from "zustand/middleware/immer";
 import { temporal } from "zundo";
 import { useStore } from "zustand";
 import type { TemporalState } from "zundo";
-import { createField } from "@/lib/constants";
+import { createField, normalizeFormDocument } from "@/lib/constants";
 import type {
   BuilderMode,
   FieldType,
+  FormConfirmation,
+  FormDisplayMode,
   FormDocument,
   FormField,
   FormTheme,
@@ -23,6 +25,8 @@ interface BuilderState {
   loadForm: (form: FormDocument) => void;
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
+  setDisplayMode: (mode: FormDisplayMode) => void;
+  updateConfirmation: (patch: Partial<FormConfirmation>) => void;
   setPublished: (published: boolean) => void;
   addField: (type: FieldType, index?: number) => void;
   updateField: (id: string, patch: Partial<FormField>) => void;
@@ -51,7 +55,7 @@ export const useBuilderStore = create<BuilderState>()(
       loadForm: (form) => {
         useBuilderStore.temporal.getState().pause();
         set((state) => {
-          state.form = structuredClone(form);
+          state.form = structuredClone(normalizeFormDocument(form));
           state.selectedFieldId = form.fields[0]?.id ?? null;
           state.mode = "edit";
           state.saveStatus = "saved";
@@ -61,7 +65,7 @@ export const useBuilderStore = create<BuilderState>()(
       },
       replaceForm: (form) => {
         set((state) => {
-          state.form = structuredClone(form);
+          state.form = structuredClone(normalizeFormDocument(form));
           if (
             state.selectedFieldId &&
             !form.fields.some((field) => field.id === state.selectedFieldId)
@@ -80,6 +84,18 @@ export const useBuilderStore = create<BuilderState>()(
         set((state) => {
           if (!state.form) return;
           state.form.description = description;
+          touch(state.form);
+        }),
+      setDisplayMode: (mode) =>
+        set((state) => {
+          if (!state.form) return;
+          state.form.displayMode = mode;
+          touch(state.form);
+        }),
+      updateConfirmation: (patch) =>
+        set((state) => {
+          if (!state.form) return;
+          Object.assign(state.form.confirmation, patch);
           touch(state.form);
         }),
       setPublished: (published) =>

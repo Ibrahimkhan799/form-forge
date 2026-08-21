@@ -39,7 +39,7 @@ export function SchemaDialog({
         if (next) setDraft(text);
       }}
     >
-      <DialogContent className="max-w-2xl rounded-2xl p-6 sm:max-w-2xl">
+      <DialogContent className="grid h-[min(720px,calc(100dvh-32px))] max-h-[calc(100dvh-32px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl p-5 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>JSON schema</DialogTitle>
           <DialogDescription>
@@ -49,7 +49,7 @@ export function SchemaDialog({
         <Textarea
           value={draft || text}
           onChange={(event) => setDraft(event.target.value)}
-          className="min-h-72 rounded-xl font-mono text-[12px]"
+          className="field-sizing-fixed h-full min-h-0 resize-none overflow-auto rounded-xl px-4 py-3 font-mono text-[12px]"
         />
         <div className="flex justify-end gap-2">
           <Button
@@ -71,6 +71,10 @@ export function SchemaDialog({
                   description: imported.description,
                   fields: imported.fields,
                   theme: parsed["x-formforge"]?.theme ?? form.theme,
+                  displayMode:
+                    parsed["x-formforge"]?.displayMode ?? form.displayMode,
+                  confirmation:
+                    parsed["x-formforge"]?.confirmation ?? form.confirmation,
                   updatedAt: new Date().toISOString(),
                 });
                 toast.success("Schema imported");
