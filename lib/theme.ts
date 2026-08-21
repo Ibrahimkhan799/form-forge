@@ -3,11 +3,22 @@ import { FONT_STACKS } from "@/lib/constants";
 import type { FormTheme } from "@/lib/types";
 
 export function themeToStyle(theme: FormTheme): CSSProperties {
+  const density = {
+    compact: { control: "40px", gap: "20px" },
+    comfortable: { control: "44px", gap: "28px" },
+    spacious: { control: "50px", gap: "36px" },
+  }[theme.density];
+
   return {
     "--ff-primary": theme.primaryColor,
     "--ff-radius": `${theme.borderRadius}px`,
     "--ff-bg": theme.backgroundColor,
     "--ff-text": theme.textColor,
+    "--ff-surface": theme.surfaceColor,
+    "--ff-input-bg": theme.inputBackgroundColor,
+    "--ff-input-border": theme.inputBorderColor,
+    "--ff-control-height": density.control,
+    "--ff-field-gap": density.gap,
     "--ff-font": FONT_STACKS[theme.fontFamily],
   } as CSSProperties;
 }

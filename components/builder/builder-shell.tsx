@@ -162,11 +162,9 @@ export function BuilderShell({ formId }: { formId: string }) {
       </div>
       {activeDragId && dragPosition ? (
         <div
-          className="pointer-events-none fixed z-[9999]"
+          className="pointer-events-none fixed top-0 left-0 z-[9999] will-change-transform"
           style={{
-            left: dragPosition.x,
-            top: dragPosition.y,
-            transform: "translate(12px, 12px)",
+            transform: `translate3d(${dragPosition.x + 10}px, ${dragPosition.y + 10}px, 0)`,
           }}
           aria-hidden
         >
@@ -192,17 +190,12 @@ function DragPreview({ type, label }: { type?: FieldType; label?: string }) {
   if (!type) return null;
 
   return (
-    <div className="flex w-72 rotate-[1deg] items-center gap-3 rounded-xl border border-[#007AFF]/40 bg-white px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.16)]">
-      <span className="grid size-8 place-items-center rounded-[9px] bg-[#F5F5F7] text-[#007AFF]">
-        <Icon icon={FIELD_TYPE_META[type].icon} size={16} />
+    <div className="flex max-w-60 items-center gap-2 rounded-[10px] border border-[#E5E5EA] bg-white px-2.5 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+      <span className="grid size-7 place-items-center rounded-[8px] bg-[#F5F5F7] text-[#007AFF]">
+        <Icon icon={FIELD_TYPE_META[type].icon} size={14} />
       </span>
-      <span className="min-w-0">
-        <span className="block truncate text-[13px] font-medium text-[#1D1D1F]">
-          {label || FIELD_TYPE_META[type].label}
-        </span>
-        <span className="block text-[12px] text-[#86868B]">
-          {FIELD_TYPE_META[type].description}
-        </span>
+      <span className="min-w-0 truncate text-[12px] font-medium text-[#1D1D1F]">
+        {label || FIELD_TYPE_META[type].label}
       </span>
     </div>
   );

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
-import type { FormDocument } from "@/lib/types";
+import type { FormButtonStyle, FormDocument, FormWidth } from "@/lib/types";
 import { buildDefaultValues, buildZodSchema } from "@/lib/schema/zod-generator";
 import { themeToStyle } from "@/lib/theme";
 import { FONT_STACKS } from "@/lib/constants";
@@ -56,6 +56,12 @@ function formSurfaceStyle(form: FormDocument) {
     fontFamily: FONT_STACKS[form.theme.fontFamily],
   };
 }
+
+const FORM_WIDTH_CLASS: Record<FormWidth, string> = {
+  narrow: "max-w-lg",
+  standard: "max-w-2xl",
+  wide: "max-w-4xl",
+};
 
 function ConversationalForm({
   form,
@@ -122,7 +128,12 @@ function ConversationalForm({
           style={{ width: `${progress}%`, background: form.theme.primaryColor }}
         />
       </div>
-      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center overflow-y-auto px-8 py-10">
+      <div
+        className={cn(
+          "mx-auto flex w-full flex-1 flex-col justify-center overflow-y-auto px-8 py-10",
+          FORM_WIDTH_CLASS[form.theme.width]
+        )}
+      >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={isWelcome ? "welcome" : isThanks ? "thanks" : field?.id}
@@ -143,7 +154,12 @@ function ConversationalForm({
                     {form.description}
                   </p>
                 ) : null}
-                <PrimaryButton color={form.theme.primaryColor} onClick={goNext} className="mt-8">
+                <PrimaryButton
+                  color={form.theme.primaryColor}
+                  buttonStyle={form.theme.buttonStyle}
+                  onClick={goNext}
+                  className="mt-8"
+                >
                   Start
                   <Icon icon={ArrowRight01Icon} size={16} />
                 </PrimaryButton>
@@ -170,7 +186,11 @@ function ConversationalForm({
                   />
                 </div>
                 <div className="mt-6 flex items-center gap-3">
-                  <PrimaryButton color={form.theme.primaryColor} onClick={goNext}>
+                  <PrimaryButton
+                    color={form.theme.primaryColor}
+                    buttonStyle={form.theme.buttonStyle}
+                    onClick={goNext}
+                  >
                     {step === form.fields.length - 1 ? "Submit" : "OK"}
                     <Icon icon={Tick02Icon} size={16} />
                   </PrimaryButton>
@@ -228,12 +248,17 @@ function ClassicForm({
       )}
       style={formSurfaceStyle(form)}
     >
-      <div className="mx-auto w-full max-w-2xl px-6 py-10 sm:py-14">
+      <div
+        className={cn(
+          "mx-auto w-full px-6 py-10 sm:py-14",
+          FORM_WIDTH_CLASS[form.theme.width]
+        )}
+      >
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18 }}
-          className="rounded-[calc(var(--ff-radius)+4px)] border border-black/8 bg-white p-6 sm:p-8"
+          className="rounded-[calc(var(--ff-radius)+4px)] border border-black/8 bg-[var(--ff-surface)] p-6 sm:p-8"
         >
           {submitted ? (
             <ConfirmationView form={form} onRestart={restart} />
@@ -244,7 +269,7 @@ function ClassicForm({
               {form.description ? (
                 <p className="mt-2 text-[15px] leading-6 text-[#86868B]">{form.description}</p>
               ) : null}
-              <div className="mt-8 space-y-7">
+              <div className="mt-8 space-y-[var(--ff-field-gap)]">
                 {form.fields.map((field) => (
                   <div key={field.id}>
                     <label className="mb-2 block text-[15px] font-medium">
@@ -262,6 +287,7 @@ function ClassicForm({
               </div>
               <PrimaryButton
                 color={form.theme.primaryColor}
+                buttonStyle={form.theme.buttonStyle}
                 type="submit"
                 className="mt-8"
               >
@@ -308,12 +334,33 @@ function ConfirmationView({
 
 function PrimaryButton({
   color,
+  buttonStyle,
   className,
   children,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   color: string;
+  buttonStyle: FormButtonStyle;
 }) {
+  const appearance =
+    buttonStyle === "soft"
+      ? {
+          background: `color-mix(in srgb, ${color} 12%, transparent)`,
+          color,
+          border: "1px solid transparent",
+        }
+      : buttonStyle === "outline"
+        ? {
+            background: "transparent",
+            color,
+            border: `1px solid ${color}`,
+          }
+        : {
+            background: color,
+            color: "#FFFFFF",
+            border: "1px solid transparent",
+          };
+
   return (
     <button
       type="button"
@@ -321,7 +368,7 @@ function PrimaryButton({
         "inline-flex h-11 items-center gap-2 rounded-[8px] px-5 text-[15px] text-white transition-opacity duration-150 hover:opacity-90",
         className
       )}
-      style={{ background: color }}
+      style={appearance}
       {...props}
     >
       {children}

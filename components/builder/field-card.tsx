@@ -2,7 +2,6 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { motion } from "framer-motion";
 import {
   Copy01Icon,
   Delete02Icon,
@@ -46,29 +45,27 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
   });
 
   return (
-    <motion.div
-      layout
-      transition={{ duration: 0.18, ease: "easeInOut" }}
+    <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       onClick={() => selectField(field.id)}
       className={cn(
-        "group rounded-xl border bg-white p-4 transition-all duration-150 dark:bg-[#1C1C1E]",
+        "group relative rounded-xl border bg-white p-3 will-change-transform dark:bg-[#1C1C1E]",
         selected
-          ? "border-[#007AFF] shadow-[0_8px_30px_rgba(0,122,255,0.08)]"
-          : "border-[#E5E5EA] hover:border-[#C7C7CC] dark:border-white/10",
-        isDragging && "opacity-60"
+          ? "border-[#007AFF]"
+          : "border-[#E5E5EA] transition-colors duration-150 hover:border-[#C7C7CC] dark:border-white/10",
+        isDragging && "z-10 opacity-0"
       )}
     >
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-2 flex items-center gap-1.5">
         <button
           type="button"
-          className="grid size-7 cursor-grab place-items-center rounded-[8px] text-[#C7C7CC] hover:bg-[#F5F5F7] hover:text-[#86868B] active:cursor-grabbing"
+          className="grid size-6 touch-none cursor-grab place-items-center rounded-[7px] text-[#C7C7CC] hover:bg-[#F5F5F7] hover:text-[#86868B] active:cursor-grabbing"
           aria-label={`Reorder question ${index + 1}`}
           {...attributes}
           {...listeners}
         >
-          <Icon icon={DragDropVerticalIcon} size={16} />
+          <Icon icon={DragDropVerticalIcon} size={14} />
         </button>
         <Select
           value={field.type}
@@ -76,7 +73,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
             if (value) changeFieldType(field.id, value as FormField["type"]);
           }}
         >
-          <SelectTrigger className="h-7 min-w-40 rounded-[8px] border-[#E5E5EA] text-[13px]">
+          <SelectTrigger className="h-7 min-w-32 rounded-[8px] border-[#E5E5EA] text-[12px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +85,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
           </SelectContent>
         </Select>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[13px] text-[#86868B]">Required</span>
+          <span className="text-[12px] text-[#86868B]">Required</span>
           <Switch
             checked={field.required}
             onCheckedChange={(checked) => updateField(field.id, { required: checked })}
@@ -126,12 +123,12 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
         value={field.label}
         onChange={(event) => updateField(field.id, { label: event.target.value })}
         placeholder="Question"
-        className="mb-3 h-10 border-transparent bg-transparent px-0 text-[17px] font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        className="mb-2 h-8 border-transparent bg-transparent px-0 text-[15px] font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
       />
       {field.helpText ? (
-        <p className="mb-3 text-[13px] text-[#86868B]">{field.helpText}</p>
+        <p className="mb-2 text-[12px] text-[#86868B]">{field.helpText}</p>
       ) : null}
       <FieldPreview field={field} />
-    </motion.div>
+    </div>
   );
 }

@@ -20,8 +20,8 @@ function FieldRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
-      <Label className="text-[13px] font-normal text-[#86868B]">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-[12px] font-normal text-[#86868B]">{label}</Label>
       {children}
     </div>
   );
@@ -102,14 +102,14 @@ export function InspectorPanel() {
 
   if (selectedFieldId === CONFIRMATION_ID && form) {
     return (
-      <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-        <div className="border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
-          <p className="text-[13px] text-[#86868B]">Inspector</p>
-          <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
+      <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
+        <div className="border-b border-[#E5E5EA] px-4 py-3 dark:border-white/10">
+          <p className="text-[11px] text-[#86868B]">Inspector</p>
+          <h2 className="mt-0.5 text-[14px] font-semibold text-[#1D1D1F] dark:text-white">
             Confirmation
           </h2>
         </div>
-        <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-4">
+        <div className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
           <FieldRow label="Title">
             <Input
               value={form.confirmation.title}
@@ -141,7 +141,7 @@ export function InspectorPanel() {
 
   if (!field) {
     return (
-      <aside className="min-h-0 w-80 shrink-0 overflow-hidden border-l border-[#E5E5EA] bg-white p-5 dark:border-white/10 dark:bg-[#1C1C1E]">
+      <aside className="min-h-0 w-72 shrink-0 overflow-hidden border-l border-[#E5E5EA] bg-white p-4 dark:border-white/10 dark:bg-[#1C1C1E]">
         <p className="text-[13px] text-[#86868B]">Inspector</p>
         <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
           No field selected
@@ -160,14 +160,14 @@ export function InspectorPanel() {
   const hasRange = field.type === "number";
 
   return (
-    <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-      <div className="border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
-        <p className="text-[13px] text-[#86868B]">Inspector</p>
-        <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
+    <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
+      <div className="border-b border-[#E5E5EA] px-4 py-3 dark:border-white/10">
+        <p className="text-[11px] text-[#86868B]">Inspector</p>
+        <h2 className="mt-0.5 text-[14px] font-semibold text-[#1D1D1F] dark:text-white">
           {FIELD_TYPE_META[field.type].label}
         </h2>
       </div>
-      <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-4">
+      <div className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
         <FieldRow label="Label">
           <Input
             value={field.label}

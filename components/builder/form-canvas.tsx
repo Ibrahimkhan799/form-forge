@@ -25,16 +25,16 @@ export function FormCanvas() {
   return (
     <div
       ref={setNodeRef}
-      className="canvas-dots h-full min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      className="builder-canvas canvas-dots h-full min-h-0 flex-1 overflow-y-auto overscroll-contain"
     >
-      <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col gap-4 px-6 py-8 pb-12">
-        <div className="rounded-xl border border-[#E5E5EA] bg-white p-5 dark:border-white/10 dark:bg-[#1C1C1E]">
-          <p className="text-[13px] text-[#86868B]">Form description</p>
+      <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-8">
+        <div className="rounded-xl border border-[#E5E5EA] bg-white p-4 dark:border-white/10 dark:bg-[#1C1C1E]">
+          <p className="text-[12px] text-[#86868B]">Form description</p>
           <Textarea
             value={form.description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Tell people what this form is for"
-            className="mt-2 min-h-20 border-transparent bg-transparent px-0 text-[15px] shadow-none focus-visible:ring-0"
+            className="mt-1 min-h-14 border-transparent bg-transparent px-0 text-[13px] shadow-none focus-visible:ring-0"
           />
         </div>
 
@@ -42,7 +42,7 @@ export function FormCanvas() {
           items={form.fields.map((field) => field.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {form.fields.map((field, index) => (
               <FieldCard key={field.id} field={field} index={index} />
             ))}
@@ -67,7 +67,7 @@ export function FormCanvas() {
         <button
           type="button"
           onClick={() => addField("text")}
-          className="flex h-11 items-center justify-center gap-2 rounded-xl border border-dashed border-[#D2D2D7] text-[13px] text-[#86868B] transition-colors duration-150 hover:border-[#007AFF] hover:text-[#007AFF]"
+          className="flex h-9 items-center justify-center gap-2 rounded-[10px] border border-dashed border-[#D2D2D7] text-[12px] text-[#86868B] transition-colors duration-150 hover:border-[#007AFF] hover:text-[#007AFF]"
         >
           <Icon icon={PlusSignIcon} size={16} />
           Add question
@@ -83,7 +83,7 @@ export function FormCanvas() {
             }
           }}
           className={cn(
-            "mt-2 rounded-xl border bg-white p-5 text-left transition-colors dark:bg-[#1C1C1E]",
+            "mt-1 rounded-xl border bg-white p-4 text-left transition-colors dark:bg-[#1C1C1E]",
             selectedFieldId === CONFIRMATION_ID
               ? "border-[#007AFF]"
               : "border-[#E5E5EA] hover:border-[#C7C7CC] dark:border-white/10"

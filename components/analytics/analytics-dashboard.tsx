@@ -20,7 +20,7 @@ import {
 import { BrandMark } from "@/components/brand";
 import { Icon } from "@/components/icon";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFormsStore } from "@/lib/store/forms-store";
 import { useSubmissionsStore } from "@/lib/store/submissions-store";
@@ -31,16 +31,20 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
   const form = useFormsStore((state) => state.forms.find((item) => item.id === formId));
   const hasHydrated = useFormsStore((state) => state.hasHydrated);
   const submissionsHydrated = useSubmissionsStore((state) => state.hasHydrated);
-  const submissions = useSubmissionsStore((state) =>
-    state.submissions.filter((item) => item.formId === formId)
-  );
-  const visits = useSubmissionsStore((state) =>
-    state.visits.filter((item) => item.formId === formId)
-  );
+  const allSubmissions = useSubmissionsStore((state) => state.submissions);
+  const allVisits = useSubmissionsStore((state) => state.visits);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
 
   const ready = hasHydrated && submissionsHydrated;
+  const submissions = useMemo(
+    () => allSubmissions.filter((item) => item.formId === formId),
+    [allSubmissions, formId]
+  );
+  const visits = useMemo(
+    () => allVisits.filter((item) => item.formId === formId),
+    [allVisits, formId]
+  );
 
   const chartData = useMemo(() => {
     const days = Array.from({ length: 14 }, (_, index) => {
@@ -110,13 +114,15 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {form ? (
-            <Button
-              variant="outline"
-              className="h-8 rounded-[8px] text-[13px]"
-              render={<Link href={`/builder/${form.id}`} />}
+            <Link
+              href={`/builder/${form.id}`}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-8 rounded-[8px] text-[13px]"
+              )}
             >
               Edit form
-            </Button>
+            </Link>
           ) : null}
         </div>
       </header>
