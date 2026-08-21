@@ -9,7 +9,10 @@ import { useSubmissionsStore } from "@/lib/store/submissions-store";
 
 function PersistHydration() {
   useEffect(() => {
-    const finishForms = () => useFormsStore.getState().setHasHydrated(true);
+    const finishForms = () => {
+      useFormsStore.getState().setHasHydrated(true);
+      void useFormsStore.getState().syncRemote();
+    };
     const finishSubmissions = () => useSubmissionsStore.getState().setHasHydrated(true);
 
     const unsubForms = useFormsStore.persist.onFinishHydration(finishForms);

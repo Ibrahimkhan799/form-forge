@@ -5,6 +5,11 @@ import { persist } from "zustand/middleware";
 import { createId } from "@/lib/id";
 import { DEMO_FORM_ID } from "@/lib/constants";
 import type { FormSubmission, FormVisit } from "@/lib/types";
+import {
+  fetchFormResponses,
+  persistSubmission,
+  persistVisit,
+} from "@/lib/supabase/repository";
 
 interface SubmissionsState {
   submissions: FormSubmission[];
@@ -16,6 +21,7 @@ interface SubmissionsState {
   getSubmissions: (formId: string) => FormSubmission[];
   getVisits: (formId: string) => FormVisit[];
   deleteSubmission: (id: string) => void;
+  syncFormResponses: (formId: string) => Promise<void>;
 }
 
 function daysAgo(days: number, hour = 12) {
@@ -72,13 +78,15 @@ export const useSubmissionsStore = create<SubmissionsState>()(
       visits: seeded.visits,
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
-      recordVisit: (formId) =>
-        set((state) => ({
-          visits: [
-            ...state.visits,
-            { id: createId(10), formId, visitedAt: new Date().toISOString() },
-          ],
-        })),
+      recordVisit: (formId) => {
+        const visit = {
+          id: createId(10),
+          formId,
+          visitedAt: new Date().toISOString(),
+        };
+        set((state) => ({ visits: [...state.visits, visit] }));
+        void persistVisit(visit).catch(() => undefined);
+      },
       addSubmission: (formId, data) => {
         const submission: FormSubmission = {
           id: createId(12),
@@ -88,6 +96,7 @@ export const useSubmissionsStore = create<SubmissionsState>()(
           completed: true,
         };
         set((state) => ({ submissions: [submission, ...state.submissions] }));
+        void persistSubmission(submission).catch(() => undefined);
         return submission;
       },
       getSubmissions: (formId) =>
@@ -97,6 +106,29 @@ export const useSubmissionsStore = create<SubmissionsState>()(
         set((state) => ({
           submissions: state.submissions.filter((item) => item.id !== id),
         })),
+      syncFormResponses: async (formId) => {
+        try {
+          const remote = await fetchFormResponses(formId);
+          set((state) => {
+            const submissions = new Map(
+              state.submissions.map((item) => [item.id, item])
+            );
+            const visits = new Map(state.visits.map((item) => [item.id, item]));
+            for (const item of remote.submissions) submissions.set(item.id, item);
+            for (const item of remote.visits) visits.set(item.id, item);
+            return {
+              submissions: Array.from(submissions.values()).sort((a, b) =>
+                b.submittedAt.localeCompare(a.submittedAt)
+              ),
+              visits: Array.from(visits.values()).sort((a, b) =>
+                b.visitedAt.localeCompare(a.visitedAt)
+              ),
+            };
+          });
+        } catch {
+          // Keep local analytics available while Supabase is offline.
+        }
+      },
     }),
     {
       name: "formforge:submissions",

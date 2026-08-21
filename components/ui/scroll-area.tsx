@@ -67,7 +67,7 @@ export function ScrollArea({
       <div
         ref={viewportRef}
         onScroll={updateMetrics}
-        className="scroll-area-viewport size-full overflow-y-scroll"
+        className="scroll-area-viewport size-full overflow-x-hidden overflow-y-scroll"
       >
         {children}
       </div>

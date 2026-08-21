@@ -10,6 +10,12 @@ import {
 } from "@/lib/constants";
 import { createId } from "@/lib/id";
 import type { FormDocument, FormVersion } from "@/lib/types";
+import {
+  fetchOwnedForms,
+  fetchPublishedForm,
+  persistForm,
+  removeForm,
+} from "@/lib/supabase/repository";
 
 interface FormsState {
   forms: FormDocument[];
@@ -22,6 +28,8 @@ interface FormsState {
   duplicateForm: (id: string) => FormDocument | undefined;
   saveVersion: (id: string, label?: string) => FormVersion | undefined;
   restoreVersion: (id: string, versionId: string) => FormDocument | undefined;
+  syncRemote: () => Promise<void>;
+  loadPublishedForm: (id: string) => Promise<FormDocument | undefined>;
 }
 
 export const useFormsStore = create<FormsState>()(
@@ -37,21 +45,25 @@ export const useFormsStore = create<FormsState>()(
       createForm: (title) => {
         const form = createBlankForm(title);
         set((state) => ({ forms: [form, ...state.forms] }));
+        void persistForm(form).catch(() => undefined);
         return form;
       },
-      upsertForm: (form) =>
+      upsertForm: (form) => {
+        const normalized = normalizeFormDocument(form);
         set((state) => {
-          const normalized = normalizeFormDocument(form);
           const index = state.forms.findIndex((item) => item.id === form.id);
           if (index === -1) return { forms: [normalized, ...state.forms] };
           const next = [...state.forms];
           next[index] = normalized;
           return { forms: next };
-        }),
+        });
+        void persistForm(normalized).catch(() => undefined);
+      },
       deleteForm: (id) => {
         set((state) => ({
           forms: state.forms.filter((form) => form.id !== id),
         }));
+        void removeForm(id).catch(() => undefined);
       },
       duplicateForm: (id) => {
         const original = get().getForm(id);
@@ -66,6 +78,7 @@ export const useFormsStore = create<FormsState>()(
           versions: [],
         };
         set((state) => ({ forms: [copy, ...state.forms] }));
+        void persistForm(copy).catch(() => undefined);
         return copy;
       },
       saveVersion: (id, label) => {
@@ -92,6 +105,45 @@ export const useFormsStore = create<FormsState>()(
         };
         get().upsertForm(restored);
         return restored;
+      },
+      syncRemote: async () => {
+        try {
+          const remoteForms = await fetchOwnedForms();
+          const merged = new Map<string, FormDocument>();
+          for (const form of [...get().forms, ...remoteForms]) {
+            const current = merged.get(form.id);
+            if (
+              !current ||
+              new Date(form.updatedAt).getTime() >=
+                new Date(current.updatedAt).getTime()
+            ) {
+              merged.set(form.id, normalizeFormDocument(form));
+            }
+          }
+          const forms = Array.from(merged.values()).sort((a, b) =>
+            b.updatedAt.localeCompare(a.updatedAt)
+          );
+          set({ forms });
+          await Promise.allSettled(forms.map((form) => persistForm(form)));
+        } catch {
+          // Local persistence remains available when Supabase is offline.
+        }
+      },
+      loadPublishedForm: async (id) => {
+        try {
+          const form = await fetchPublishedForm(id);
+          if (form) {
+            set((state) => ({
+              forms: [
+                form,
+                ...state.forms.filter((item) => item.id !== form.id),
+              ],
+            }));
+          }
+          return form;
+        } catch {
+          return undefined;
+        }
       },
     }),
     {

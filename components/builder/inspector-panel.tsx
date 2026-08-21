@@ -46,7 +46,7 @@ function PanelShell({
   children: React.ReactNode;
 }) {
   return (
-    <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+    <aside className="flex min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
       <div className="space-y-3 border-b border-border/80 px-3 py-3">
         <RightPanelTabs value="inspector" onChange={onViewChange} />
         <div>
@@ -54,8 +54,8 @@ function PanelShell({
           <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">{title}</h2>
         </div>
       </div>
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-4 px-4 py-3 pr-5">{children}</div>
+      <ScrollArea className="h-0 min-h-0 flex-1">
+        <div className="space-y-4 px-4 pt-3 pr-8 pb-24">{children}</div>
       </ScrollArea>
     </aside>
   );
