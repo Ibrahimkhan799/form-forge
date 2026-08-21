@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { FONT_STACKS } from "@/lib/constants";
+import { fontFamilyStack } from "@/lib/constants";
 import type { FormTheme } from "@/lib/types";
 
 export function themeToStyle(theme: FormTheme): CSSProperties {
@@ -19,7 +19,8 @@ export function themeToStyle(theme: FormTheme): CSSProperties {
     "--ff-input-border": theme.inputBorderColor,
     "--ff-control-height": density.control,
     "--ff-field-gap": density.gap,
-    "--ff-font": FONT_STACKS[theme.fontFamily],
+    "--ff-font": fontFamilyStack(theme.bodyFontFamily),
+    "--ff-heading-font": fontFamilyStack(theme.headingFontFamily),
   } as CSSProperties;
 }
 

@@ -9,9 +9,10 @@ import {
   MoreHorizontalIcon,
 } from "@hugeicons/core-free-icons";
 import { FIELD_TYPE_META } from "@/lib/constants";
-import { FIELD_TYPES, type FormField } from "@/lib/types";
+import { FIELD_TYPES, isInputFieldType, type FormField } from "@/lib/types";
 import { Icon } from "@/components/icon";
 import { FieldPreview } from "@/components/fields/field-preview";
+import { ComponentFrame } from "@/components/fields/showcase-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -85,11 +86,15 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
           </SelectContent>
         </Select>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">Required</span>
-          <Switch
-            checked={field.required}
-            onCheckedChange={(checked) => updateField(field.id, { required: checked })}
-          />
+          {isInputFieldType(field.type) ? (
+            <>
+              <span className="text-[11px] text-muted-foreground">Required</span>
+              <Switch
+                checked={field.required}
+                onCheckedChange={(checked) => updateField(field.id, { required: checked })}
+              />
+            </>
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -123,12 +128,18 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
         value={field.label}
         onChange={(event) => updateField(field.id, { label: event.target.value })}
         placeholder="Question"
-        className="mb-2 h-8 border-transparent bg-transparent px-0 text-[15px] font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        className="mb-2 h-8 border-transparent bg-muted/35 px-3 text-[13px] font-medium shadow-none focus-visible:border-[#007AFF]/40 focus-visible:ring-0"
       />
       {field.helpText ? (
         <p className="mb-2 text-[11px] text-muted-foreground">{field.helpText}</p>
       ) : null}
-      <FieldPreview field={field} />
+      {isInputFieldType(field.type) ? (
+        <ComponentFrame field={field}>
+          <FieldPreview field={field} />
+        </ComponentFrame>
+      ) : (
+        <FieldPreview field={field} />
+      )}
     </div>
   );
 }

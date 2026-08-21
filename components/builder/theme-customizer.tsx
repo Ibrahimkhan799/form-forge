@@ -1,22 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { DEFAULT_THEME, FONT_STACKS } from "@/lib/constants";
+import { DEFAULT_THEME } from "@/lib/constants";
 import {
   BACKGROUND_STYLES,
   BUTTON_STYLES,
-  FONT_FAMILIES,
   FORM_DENSITIES,
   FORM_WIDTHS,
 } from "@/lib/types";
 import type {
   BackgroundStyle,
-  FontFamily,
   FormButtonStyle,
   FormDensity,
   FormWidth,
 } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { FontPicker } from "@/components/fonts/font-picker";
 import {
   Dialog,
   DialogContent,
@@ -37,18 +36,6 @@ const SWATCHES = [
   "#FF3B30",
   "#1D1D1F",
 ];
-
-const FONT_LABELS: Record<FontFamily, string> = {
-  "sf-pro": "SF Pro",
-  inter: "Inter",
-  "dm-sans": "DM Sans",
-  manrope: "Manrope",
-  "space-grotesk": "Space Grotesk",
-  playfair: "Playfair Display",
-  "source-serif": "Source Serif",
-  georgia: "Georgia",
-  mono: "JetBrains Mono",
-};
 
 const STYLE_LABELS: Record<BackgroundStyle, string> = {
   solid: "Solid",
@@ -258,24 +245,25 @@ export function ThemeCustomizer({
             />
           </Section>
 
-          <Section title="Google fonts" description="Fonts are embedded and served by Next.js.">
-            <div className="grid grid-cols-2 gap-1.5">
-              {FONT_FAMILIES.map((font) => (
-                <button
-                  key={font}
-                  type="button"
-                  onClick={() => updateTheme({ fontFamily: font })}
-                  className={cn(
-                    "flex h-9 items-center rounded-[7px] border px-3 text-left text-[12px] transition-colors",
-                    theme.fontFamily === font
-                      ? "border-[#007AFF] bg-[#007AFF]/6 text-[#007AFF]"
-                      : "border-border text-foreground hover:bg-muted/60"
-                  )}
-                  style={{ fontFamily: FONT_STACKS[font] }}
-                >
-                  {FONT_LABELS[font]}
-                </button>
-              ))}
+          <Section
+            title="Typography"
+            description="Search the complete Google Fonts catalog; selected fonts load on demand."
+          >
+            <div className="grid grid-cols-2 gap-2">
+              <FontPicker
+                label="Body"
+                value={theme.bodyFontFamily}
+                onChange={(bodyFontFamily) =>
+                  updateTheme({ bodyFontFamily, fontFamily: bodyFontFamily })
+                }
+              />
+              <FontPicker
+                label="Heading"
+                value={theme.headingFontFamily}
+                onChange={(headingFontFamily) =>
+                  updateTheme({ headingFontFamily })
+                }
+              />
             </div>
           </Section>
 

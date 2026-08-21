@@ -88,18 +88,24 @@ export function BuilderShell({ formId }: { formId: string }) {
 
     const activeId = String(active.id);
     const overId = String(over.id);
+    const overFieldId = overId.startsWith("layer:")
+      ? overId.replace("layer:", "")
+      : overId;
 
     if (activeId.startsWith("library:")) {
       const type = activeId.replace("library:", "") as FieldType;
-      const overIndex = form.fields.findIndex((field) => field.id === overId);
+      const overIndex = form.fields.findIndex((field) => field.id === overFieldId);
       useBuilderStore
         .getState()
         .addField(type, overIndex === -1 ? form.fields.length : overIndex);
       return;
     }
 
-    const from = form.fields.findIndex((field) => field.id === activeId);
-    const to = form.fields.findIndex((field) => field.id === overId);
+    const activeFieldId = activeId.startsWith("layer:")
+      ? activeId.replace("layer:", "")
+      : activeId;
+    const from = form.fields.findIndex((field) => field.id === activeFieldId);
+    const to = form.fields.findIndex((field) => field.id === overFieldId);
     if (from !== -1 && to !== -1 && from !== to) {
       useBuilderStore.getState().reorderFields(from, to);
     }
@@ -172,12 +178,24 @@ export function BuilderShell({ formId }: { formId: string }) {
             type={
               activeDragId.startsWith("library:")
                 ? (activeDragId.replace("library:", "") as FieldType)
-                : form.fields.find((field) => field.id === activeDragId)?.type
+                : form.fields.find(
+                    (field) =>
+                      field.id ===
+                      (activeDragId.startsWith("layer:")
+                        ? activeDragId.replace("layer:", "")
+                        : activeDragId)
+                  )?.type
             }
             label={
               activeDragId.startsWith("library:")
                 ? undefined
-                : form.fields.find((field) => field.id === activeDragId)?.label
+                : form.fields.find(
+                    (field) =>
+                      field.id ===
+                      (activeDragId.startsWith("layer:")
+                        ? activeDragId.replace("layer:", "")
+                        : activeDragId)
+                  )?.label
             }
           />
         </div>

@@ -1,7 +1,7 @@
 import { createId } from "@/lib/id";
 import { createField } from "@/lib/constants";
-import type { FieldType, FormDocument, FormField } from "@/lib/types";
-import { FIELD_TYPES } from "@/lib/types";
+import type { InputFieldType, FormDocument, FormField } from "@/lib/types";
+import { INPUT_FIELD_TYPES, isInputFieldType } from "@/lib/types";
 
 export interface JsonSchemaProperty {
   type?: string | string[];
@@ -30,10 +30,12 @@ export interface FormJsonSchema {
     displayMode?: FormDocument["displayMode"];
     confirmation?: FormDocument["confirmation"];
     fieldMeta?: Record<string, Partial<FormField>>;
+    showcaseLayers?: FormField[];
+    layerOrder?: string[];
   };
 }
 
-const JSON_TYPE_MAP: Record<FieldType, JsonSchemaProperty> = {
+const JSON_TYPE_MAP: Record<InputFieldType, JsonSchemaProperty> = {
   text: { type: "string" },
   email: { type: "string", format: "email" },
   phone: { type: "string" },
@@ -49,6 +51,7 @@ const JSON_TYPE_MAP: Record<FieldType, JsonSchemaProperty> = {
 };
 
 export function fieldToJsonSchemaProperty(field: FormField): JsonSchemaProperty {
+  if (!isInputFieldType(field.type)) return {};
   const base: JsonSchemaProperty = {
     ...JSON_TYPE_MAP[field.type],
     title: field.label,
@@ -94,8 +97,10 @@ export function formToJsonSchema(form: FormDocument): FormJsonSchema {
   const fieldMeta: Record<string, Partial<FormField>> = {};
 
   for (const field of form.fields) {
-    properties[field.id] = fieldToJsonSchemaProperty(field);
-    if (field.required) required.push(field.id);
+    if (isInputFieldType(field.type)) {
+      properties[field.id] = fieldToJsonSchemaProperty(field);
+      if (field.required) required.push(field.id);
+    }
     fieldMeta[field.id] = {
       type: field.type,
       placeholder: field.placeholder,
@@ -103,6 +108,7 @@ export function formToJsonSchema(form: FormDocument): FormJsonSchema {
       accept: field.accept,
       maxRating: field.maxRating,
       randomizeOptions: field.randomizeOptions,
+      componentStyle: field.componentStyle,
     };
   }
 
@@ -118,11 +124,13 @@ export function formToJsonSchema(form: FormDocument): FormJsonSchema {
       displayMode: form.displayMode,
       confirmation: form.confirmation,
       fieldMeta,
+      showcaseLayers: form.fields.filter((field) => !isInputFieldType(field.type)),
+      layerOrder: form.fields.map((field) => field.id),
     },
   };
 }
 
-function inferFieldType(key: string, property: JsonSchemaProperty): FieldType {
+function inferFieldType(key: string, property: JsonSchemaProperty): InputFieldType {
   if (property.format === "email") return "email";
   if (property.format === "date") return "date";
   if (property.format === "tel") return "phone";
@@ -134,7 +142,9 @@ function inferFieldType(key: string, property: JsonSchemaProperty): FieldType {
   const lower = key.toLowerCase();
   if (lower.includes("email")) return "email";
   if (lower.includes("phone") || lower.includes("tel")) return "phone";
-  if (FIELD_TYPES.includes(lower as FieldType)) return lower as FieldType;
+  if (INPUT_FIELD_TYPES.includes(lower as InputFieldType)) {
+    return lower as InputFieldType;
+  }
   return "text";
 }
 
@@ -149,7 +159,8 @@ export function jsonSchemaToFields(schema: FormJsonSchema): {
 
   const fields = Object.entries(properties).map(([key, property]) => {
     const hinted = meta[key]?.type;
-    const type = hinted && FIELD_TYPES.includes(hinted) ? hinted : inferFieldType(key, property);
+    const type =
+      hinted && isInputFieldType(hinted) ? hinted : inferFieldType(key, property);
     const field = createField(type);
     field.id = key || createId(10);
     field.label = property.title || meta[key]?.label || field.label;
@@ -159,6 +170,7 @@ export function jsonSchemaToFields(schema: FormJsonSchema): {
     field.accept = meta[key]?.accept ?? field.accept;
     field.maxRating = meta[key]?.maxRating ?? property.maximum ?? field.maxRating;
     field.randomizeOptions = meta[key]?.randomizeOptions;
+    field.componentStyle = meta[key]?.componentStyle ?? field.componentStyle;
 
     if (type === "text") {
       field.validation = {
@@ -191,10 +203,23 @@ export function jsonSchemaToFields(schema: FormJsonSchema): {
     return field;
   });
 
+  const showcaseLayers = (schema["x-formforge"]?.showcaseLayers ?? []).map(
+    (field) => ({ ...createField(field.type), ...field })
+  );
+  const combined = [...fields, ...showcaseLayers];
+  const order = schema["x-formforge"]?.layerOrder ?? [];
+  const orderedFields = order.length
+    ? [...combined].sort(
+        (a, b) =>
+          (order.indexOf(a.id) === -1 ? Number.MAX_SAFE_INTEGER : order.indexOf(a.id)) -
+          (order.indexOf(b.id) === -1 ? Number.MAX_SAFE_INTEGER : order.indexOf(b.id))
+      )
+    : combined;
+
   return {
     title: schema.title || "Imported form",
     description: schema.description || "",
-    fields,
+    fields: orderedFields,
   };
 }
 

@@ -1,4 +1,4 @@
-export const FIELD_TYPES = [
+export const INPUT_FIELD_TYPES = [
   "text",
   "email",
   "phone",
@@ -11,7 +11,20 @@ export const FIELD_TYPES = [
   "rating",
 ] as const;
 
+export const SHOWCASE_FIELD_TYPES = ["image", "richText"] as const;
+
+export const FIELD_TYPES = [
+  ...INPUT_FIELD_TYPES,
+  ...SHOWCASE_FIELD_TYPES,
+] as const;
+
 export type FieldType = (typeof FIELD_TYPES)[number];
+export type InputFieldType = (typeof INPUT_FIELD_TYPES)[number];
+export type ShowcaseFieldType = (typeof SHOWCASE_FIELD_TYPES)[number];
+
+export function isInputFieldType(type: FieldType): type is InputFieldType {
+  return (INPUT_FIELD_TYPES as readonly string[]).includes(type);
+}
 
 export interface FieldOption {
   id: string;
@@ -27,6 +40,15 @@ export interface FieldValidation {
   patternMessage?: string;
 }
 
+export interface ComponentStyle {
+  width: "full" | "half" | "third";
+  alignment: "left" | "center" | "right";
+  backgroundColor?: string;
+  textColor?: string;
+  padding: number;
+  borderRadius?: number;
+}
+
 export interface FormField {
   id: string;
   type: FieldType;
@@ -39,6 +61,12 @@ export interface FormField {
   maxRating?: number;
   accept?: string;
   randomizeOptions?: boolean;
+  richText?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  imageCaption?: string;
+  imageFit?: "cover" | "contain";
+  componentStyle: ComponentStyle;
 }
 
 export const FONT_FAMILIES = [
@@ -72,7 +100,9 @@ export interface FormTheme {
   primaryColor: string;
   borderRadius: number;
   backgroundStyle: BackgroundStyle;
-  fontFamily: FontFamily;
+  fontFamily: string;
+  bodyFontFamily: string;
+  headingFontFamily: string;
   backgroundColor: string;
   textColor: string;
   surfaceColor: string;

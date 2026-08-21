@@ -5,14 +5,21 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
-import type { FormButtonStyle, FormDocument, FormWidth } from "@/lib/types";
+import {
+  isInputFieldType,
+  type FormButtonStyle,
+  type FormDocument,
+  type FormWidth,
+} from "@/lib/types";
 import { buildDefaultValues, buildZodSchema } from "@/lib/schema/zod-generator";
 import { themeToStyle } from "@/lib/theme";
-import { FONT_STACKS } from "@/lib/constants";
 import { Icon } from "@/components/icon";
 import { FieldInput } from "@/components/renderer/field-input";
+import { ComponentFrame, ShowcaseField } from "@/components/fields/showcase-field";
+import { GoogleFontLoader } from "@/components/fonts/google-font-loader";
 import { useSubmissionsStore } from "@/lib/store/submissions-store";
 import { cn } from "@/lib/utils";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 export function FormPlayer({
   form,
@@ -27,10 +34,17 @@ export function FormPlayer({
     if (!preview) recordVisit(form.id);
   }, [form.id, preview, recordVisit]);
 
-  return form.displayMode === "classic" ? (
-    <ClassicForm form={form} preview={preview} />
-  ) : (
-    <ConversationalForm form={form} preview={preview} />
+  return (
+    <>
+      <GoogleFontLoader
+        families={[form.theme.bodyFontFamily, form.theme.headingFontFamily]}
+      />
+      {form.displayMode === "classic" ? (
+        <ClassicForm form={form} preview={preview} />
+      ) : (
+        <ConversationalForm form={form} preview={preview} />
+      )}
+    </>
   );
 }
 
@@ -53,7 +67,6 @@ function formSurfaceStyle(form: FormDocument) {
     ...themeToStyle(form.theme),
     background,
     color: form.theme.textColor,
-    fontFamily: FONT_STACKS[form.theme.fontFamily],
   };
 }
 
@@ -89,6 +102,9 @@ function ConversationalForm({
   const field = step >= 0 && step < form.fields.length ? form.fields[step] : null;
   const isWelcome = step === -1;
   const isThanks = step >= form.fields.length;
+  const questionCount = form.fields.filter((item) =>
+    isInputFieldType(item.type)
+  ).length;
   const progress =
     isWelcome || isThanks
       ? isThanks
@@ -97,7 +113,7 @@ function ConversationalForm({
       : ((step + 1) / form.fields.length) * 100;
 
   async function goNext() {
-    if (field) {
+    if (field && isInputFieldType(field.type)) {
       const valid = await methods.trigger(field.id);
       if (!valid) return;
     }
@@ -146,7 +162,7 @@ function ConversationalForm({
             {isWelcome ? (
               <div>
                 <p className="text-[13px] text-[#86868B]">
-                  {form.fields.length} question{form.fields.length === 1 ? "" : "s"}
+                  {questionCount} question{questionCount === 1 ? "" : "s"}
                 </p>
                 <h1 className="mt-3 text-4xl font-semibold tracking-tight">{form.title}</h1>
                 {form.description ? (
@@ -169,29 +185,45 @@ function ConversationalForm({
 
             {field ? (
               <div>
-                <p className="text-[13px] text-[#86868B]">
-                  {step + 1} of {form.fields.length}
-                  {field.required ? " · Required" : ""}
-                </p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight">{field.label}</h2>
-                {field.helpText ? (
-                  <p className="mt-2 text-[15px] text-[#86868B]">{field.helpText}</p>
-                ) : null}
-                <div className="mt-6">
-                  <FieldInput
-                    field={field}
-                    control={methods.control}
-                    autoFocus
-                    onEnter={goNext}
-                  />
-                </div>
+                {isInputFieldType(field.type) ? (
+                  <>
+                    <p className="text-[13px] text-[#86868B]">
+                      {step + 1} of {form.fields.length}
+                      {field.required ? " · Required" : ""}
+                    </p>
+                    <ComponentFrame field={field}>
+                      <h2 className="ff-heading mt-3 text-3xl font-semibold tracking-tight">
+                        {field.label}
+                      </h2>
+                      {field.helpText ? (
+                        <p className="mt-2 text-[15px] text-[#86868B]">
+                          {field.helpText}
+                        </p>
+                      ) : null}
+                      <div className="mt-6">
+                        <FieldInput
+                          field={field}
+                          control={methods.control}
+                          autoFocus
+                          onEnter={goNext}
+                        />
+                      </div>
+                    </ComponentFrame>
+                  </>
+                ) : (
+                  <ShowcaseField field={field} />
+                )}
                 <div className="mt-6 flex items-center gap-3">
                   <PrimaryButton
                     color={form.theme.primaryColor}
                     buttonStyle={form.theme.buttonStyle}
                     onClick={goNext}
                   >
-                    {step === form.fields.length - 1 ? "Submit" : "OK"}
+                    {step === form.fields.length - 1
+                      ? "Submit"
+                      : isInputFieldType(field.type)
+                        ? "OK"
+                        : "Continue"}
                     <Icon icon={Tick02Icon} size={16} />
                   </PrimaryButton>
                   <button
@@ -272,16 +304,24 @@ function ClassicForm({
               <div className="mt-8 space-y-[var(--ff-field-gap)]">
                 {form.fields.map((field) => (
                   <div key={field.id}>
-                    <label className="mb-2 block text-[15px] font-medium">
-                      {field.label}
-                      {field.required ? (
-                        <span className="ml-1 text-[var(--ff-primary)]">*</span>
-                      ) : null}
-                    </label>
-                    {field.helpText ? (
-                      <p className="mb-3 text-[13px] text-[#86868B]">{field.helpText}</p>
-                    ) : null}
-                    <FieldInput field={field} control={methods.control} />
+                    {isInputFieldType(field.type) ? (
+                      <ComponentFrame field={field}>
+                        <label className="ff-heading mb-2 block text-[15px] font-medium">
+                          {field.label}
+                          {field.required ? (
+                            <span className="ml-1 text-[var(--ff-primary)]">*</span>
+                          ) : null}
+                        </label>
+                        {field.helpText ? (
+                          <p className="mb-3 text-[13px] text-[#86868B]">
+                            {field.helpText}
+                          </p>
+                        ) : null}
+                        <FieldInput field={field} control={methods.control} />
+                      </ComponentFrame>
+                    ) : (
+                      <ShowcaseField field={field} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -318,9 +358,12 @@ function ConfirmationView({
         <Icon icon={Tick02Icon} size={22} />
       </div>
       <h2 className="text-4xl font-semibold tracking-tight">{form.confirmation.title}</h2>
-      <p className="mt-3 text-[15px] leading-6 text-[#86868B]">
-        {form.confirmation.message}
-      </p>
+      <div
+        className="rich-text-content mt-3 text-[15px] leading-6 text-[#86868B]"
+        dangerouslySetInnerHTML={{
+          __html: sanitizeRichText(form.confirmation.message),
+        }}
+      />
       <button
         type="button"
         onClick={onRestart}

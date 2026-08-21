@@ -171,6 +171,7 @@ export const useBuilderStore = create<BuilderState>()(
           next.helpText = previous.helpText;
           next.required = previous.required;
           next.placeholder = previous.placeholder;
+          next.componentStyle = structuredClone(previous.componentStyle);
           if (previous.options && next.options) next.options = previous.options;
           state.form.fields[index] = next;
           touch(state.form);
