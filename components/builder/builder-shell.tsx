@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
-  DragOverlay,
   PointerSensor,
   closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragMoveEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,6 +34,10 @@ export function BuilderShell({ formId }: { formId: string }) {
     state.forms.find((item) => item.id === formId)
   );
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
 
   useAutosave();
   useBuilderShortcuts();
@@ -52,10 +56,33 @@ export function BuilderShell({ formId }: { formId: string }) {
   function handleDragStart(event: DragStartEvent) {
     const id = String(event.active.id);
     setActiveDragId(id);
+    const activator = event.activatorEvent;
+    if ("clientX" in activator && "clientY" in activator) {
+      const origin = {
+        x: Number(activator.clientX),
+        y: Number(activator.clientY),
+      };
+      dragOrigin.current = origin;
+      setDragPosition(origin);
+    }
+  }
+
+  function handleDragMove(event: DragMoveEvent) {
+    if (!dragOrigin.current) return;
+    setDragPosition({
+      x: dragOrigin.current.x + event.delta.x,
+      y: dragOrigin.current.y + event.delta.y,
+    });
+  }
+
+  function clearDragPreview() {
+    setActiveDragId(null);
+    setDragPosition(null);
+    dragOrigin.current = null;
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveDragId(null);
+    clearDragPreview();
     const { active, over } = event;
     if (!over || !form) return;
 
@@ -99,8 +126,9 @@ export function BuilderShell({ formId }: { formId: string }) {
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveDragId(null)}
+      onDragCancel={clearDragPreview}
     >
       <div className="fixed inset-0 flex h-dvh w-screen flex-col overflow-hidden bg-[#FBFBFD] dark:bg-black">
         <CanvasHeader />
@@ -132,8 +160,16 @@ export function BuilderShell({ formId }: { formId: string }) {
           )}
         </AnimatePresence>
       </div>
-      <DragOverlay dropAnimation={null} zIndex={100}>
-        {activeDragId ? (
+      {activeDragId && dragPosition ? (
+        <div
+          className="pointer-events-none fixed z-[9999]"
+          style={{
+            left: dragPosition.x,
+            top: dragPosition.y,
+            transform: "translate(12px, 12px)",
+          }}
+          aria-hidden
+        >
           <DragPreview
             type={
               activeDragId.startsWith("library:")
@@ -146,8 +182,8 @@ export function BuilderShell({ formId }: { formId: string }) {
                 : form.fields.find((field) => field.id === activeDragId)?.label
             }
           />
-        ) : null}
-      </DragOverlay>
+        </div>
+      ) : null}
     </DndContext>
   );
 }
