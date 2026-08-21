@@ -6,6 +6,7 @@ import { PlusSignIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { FieldCard } from "@/components/builder/field-card";
 import { Icon } from "@/components/icon";
 import { Input } from "@/components/ui/input";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { CONFIRMATION_ID } from "@/lib/constants";
 import { useBuilderStore } from "@/lib/store/builder-store";
@@ -106,12 +107,13 @@ export function FormCanvas() {
             onChange={(event) => updateConfirmation({ title: event.target.value })}
             className="h-10 border-transparent bg-[#F5F5F7] px-4 text-[15px] font-medium shadow-none focus-visible:border-[#007AFF] dark:bg-white/6"
           />
-          <Textarea
-            value={form.confirmation.message}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => updateConfirmation({ message: event.target.value })}
-            className="mt-2 min-h-16 border-transparent bg-[#F5F5F7] px-4 text-[13px] shadow-none focus-visible:border-[#007AFF] dark:bg-white/6"
-          />
+          <div onClick={(event) => event.stopPropagation()} className="mt-2">
+            <RichTextEditor
+              value={form.confirmation.message}
+              onChange={(message) => updateConfirmation({ message })}
+              minHeight={72}
+            />
+          </div>
         </div>
       </div>
     </div>

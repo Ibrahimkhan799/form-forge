@@ -122,7 +122,7 @@ export function DashboardView() {
               </Link>
 
               <div className="hidden sm:block">
-                <p className="text-[11px]">{form.fields.length} fields</p>
+                <p className="text-[11px]">{form.fields.length} layers</p>
                 <p className="text-[10px] text-muted-foreground">
                   {form.displayMode === "classic" ? "All at once" : "One at a time"}
                 </p>

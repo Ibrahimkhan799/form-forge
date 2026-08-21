@@ -6,6 +6,7 @@ import {
   CheckmarkSquare02Icon,
   CloudUploadIcon,
   HashtagIcon,
+  Image01Icon,
   Mail01Icon,
   RadioButtonIcon,
   StarIcon,
@@ -29,6 +30,8 @@ export const DEFAULT_THEME: FormTheme = {
   borderRadius: 12,
   backgroundStyle: "solid",
   fontFamily: "sf-pro",
+  bodyFontFamily: "Inter",
+  headingFontFamily: "Inter",
   backgroundColor: "#FFFFFF",
   textColor: "#1D1D1F",
   surfaceColor: "#FFFFFF",
@@ -41,11 +44,11 @@ export const DEFAULT_THEME: FormTheme = {
 
 export const DEFAULT_CONFIRMATION: FormConfirmation = {
   title: "Thank you",
-  message: "Your response has been recorded.",
+  message: "<p>Your response has been recorded.</p>",
   buttonLabel: "Submit another response",
 };
 
-export const FONT_STACKS: Record<FormTheme["fontFamily"], string> = {
+export const FONT_STACKS: Record<string, string> = {
   "sf-pro":
     '"SF Pro Display", "SF Pro Text", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   inter: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -58,12 +61,19 @@ export const FONT_STACKS: Record<FormTheme["fontFamily"], string> = {
   mono: 'var(--font-jetbrains-mono), "SF Mono", ui-monospace, Menlo, monospace',
 };
 
+export function fontFamilyStack(family: string) {
+  return (
+    FONT_STACKS[family] ??
+    `"${family.replaceAll('"', "")}", var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+  );
+}
+
 export interface FieldTypeMeta {
   type: FieldType;
   label: string;
   description: string;
   icon: IconSvgElement;
-  group: "standard" | "choice" | "media";
+  group: "standard" | "choice" | "media" | "content";
 }
 
 export const FIELD_TYPE_META: Record<FieldType, FieldTypeMeta> = {
@@ -137,12 +147,27 @@ export const FIELD_TYPE_META: Record<FieldType, FieldTypeMeta> = {
     icon: CloudUploadIcon,
     group: "media",
   },
+  image: {
+    type: "image",
+    label: "Image",
+    description: "Visual content block",
+    icon: Image01Icon,
+    group: "content",
+  },
+  richText: {
+    type: "richText",
+    label: "Rich text",
+    description: "Formatted content block",
+    icon: TextIcon,
+    group: "content",
+  },
 };
 
 export const FIELD_GROUPS: { id: FieldTypeMeta["group"]; label: string }[] = [
   { id: "standard", label: "Standard" },
   { id: "choice", label: "Choice" },
   { id: "media", label: "Media" },
+  { id: "content", label: "Content" },
 ];
 
 function defaultOptions(): FormField["options"] {
@@ -161,6 +186,11 @@ export function createField(type: FieldType): FormField {
     placeholder: "",
     helpText: "",
     required: false,
+    componentStyle: {
+      width: "full",
+      alignment: "left",
+      padding: 0,
+    },
   };
 
   switch (type) {
@@ -207,6 +237,27 @@ export function createField(type: FieldType): FormField {
         helpText: "PNG, JPG, or PDF up to 10 MB",
         accept: "image/*,.pdf",
       };
+    case "image":
+      return {
+        ...base,
+        label: "Image",
+        imageUrl:
+          "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+        imageAlt: "Team collaborating around a table",
+        imageCaption: "",
+        imageFit: "cover",
+        componentStyle: {
+          ...base.componentStyle,
+          borderRadius: 12,
+        },
+      };
+    case "richText":
+      return {
+        ...base,
+        label: "Rich text",
+        richText:
+          "<h3>Share a little context</h3><p>Add supporting copy, instructions, links, or a short story between questions.</p>",
+      };
   }
 }
 
@@ -238,12 +289,39 @@ export function cloneSnapshot(form: FormDocument): FormVersion["snapshot"] {
   });
 }
 
+const LEGACY_FONT_NAMES: Record<string, string> = {
+  "sf-pro": "Inter",
+  inter: "Inter",
+  "dm-sans": "DM Sans",
+  manrope: "Manrope",
+  "space-grotesk": "Space Grotesk",
+  playfair: "Playfair Display",
+  "source-serif": "Source Serif 4",
+  georgia: "Lora",
+  mono: "JetBrains Mono",
+};
+
+function normalizeField(field: FormField): FormField {
+  return {
+    ...field,
+    componentStyle: field.componentStyle ?? {
+      width: "full",
+      alignment: "left",
+      padding: 0,
+    },
+  };
+}
+
 export function normalizeFormDocument(form: FormDocument): FormDocument {
+  const legacyFont = LEGACY_FONT_NAMES[form.theme?.fontFamily] ?? "Inter";
   return {
     ...form,
+    fields: (form.fields ?? []).map(normalizeField),
     theme: {
       ...DEFAULT_THEME,
       ...(form.theme ?? {}),
+      bodyFontFamily: form.theme?.bodyFontFamily ?? legacyFont,
+      headingFontFamily: form.theme?.headingFontFamily ?? legacyFont,
     },
     displayMode: form.displayMode ?? "conversational",
     confirmation: {
@@ -257,7 +335,16 @@ export function normalizeFormDocument(form: FormDocument): FormDocument {
         theme: {
           ...DEFAULT_THEME,
           ...(version.snapshot.theme ?? form.theme ?? {}),
+          bodyFontFamily:
+            version.snapshot.theme?.bodyFontFamily ??
+            form.theme?.bodyFontFamily ??
+            legacyFont,
+          headingFontFamily:
+            version.snapshot.theme?.headingFontFamily ??
+            form.theme?.headingFontFamily ??
+            legacyFont,
         },
+        fields: (version.snapshot.fields ?? []).map(normalizeField),
         displayMode: version.snapshot.displayMode ?? form.displayMode ?? "conversational",
         confirmation: {
           ...DEFAULT_CONFIRMATION,

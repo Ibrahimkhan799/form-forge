@@ -1,8 +1,11 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/core";
-import { FIELD_GROUPS, FIELD_TYPE_META } from "@/lib/constants";
-import { FIELD_TYPES, type FieldType } from "@/lib/types";
+import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { DragDropVerticalIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { CONFIRMATION_ID, FIELD_GROUPS, FIELD_TYPE_META } from "@/lib/constants";
+import { FIELD_TYPES, type FieldType, type FormField } from "@/lib/types";
 import { Icon } from "@/components/icon";
 import { useBuilderStore } from "@/lib/store/builder-store";
 import { cn } from "@/lib/utils";
@@ -35,6 +38,60 @@ function LibraryItem({ type }: { type: FieldType }) {
         <span className="block text-[11px] text-muted-foreground">{meta.description}</span>
       </span>
     </button>
+  );
+}
+
+function LayerRow({
+  field,
+  index,
+  selected,
+  onSelect,
+}: {
+  field: FormField;
+  index: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: `layer:${field.id}` });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        "flex items-center rounded-[7px] pr-1 transition-colors",
+        selected ? "bg-card ring-1 ring-[#007AFF]/25" : "hover:bg-card/80",
+        isDragging && "opacity-30"
+      )}
+    >
+      <button
+        type="button"
+        aria-label={`Reorder ${field.label}`}
+        className="grid size-6 touch-none cursor-grab place-items-center text-muted-foreground/45 hover:text-muted-foreground"
+        {...attributes}
+        {...listeners}
+      >
+        <Icon icon={DragDropVerticalIcon} size={12} />
+      </button>
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"
+      >
+        <span className="grid size-5 place-items-center rounded-[5px] bg-muted text-[9px] text-muted-foreground">
+          {index + 1}
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-[11px] text-foreground">
+            {field.label || "Untitled"}
+          </span>
+          <span className="block text-[9px] text-muted-foreground">
+            {FIELD_TYPE_META[field.type].label}
+          </span>
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -90,34 +147,41 @@ export function ComponentLibrary() {
       </div>
       <div className="border-t border-border/80 p-2">
         <p className="mb-2 px-1 text-[11px] text-muted-foreground">
-          Questions ({form?.fields.length ?? 0})
+          Layers ({(form?.fields.length ?? 0) + 1})
         </p>
         <div className="max-h-40 space-y-0.5 overflow-y-auto">
-          {form?.fields.map((field, index) => (
-            <button
-              key={field.id}
-              type="button"
-              onClick={() => selectField(field.id)}
-              className={cn(
-                "flex w-full items-start gap-2 rounded-[9px] px-2 py-1.5 text-left transition-colors duration-150",
-                selectedFieldId === field.id
-                  ? "bg-card ring-1 ring-[#007AFF]/25"
-                  : "hover:bg-card/80"
-              )}
-            >
-              <span className="mt-0.5 grid size-5 place-items-center rounded-[5px] bg-muted text-[10px] text-muted-foreground">
-                {index + 1}
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-[12px] text-foreground">
-                  {field.label || "Untitled"}
-                </span>
-                <span className="block text-[10px] text-muted-foreground">
-                  {FIELD_TYPE_META[field.type].label}
-                </span>
-              </span>
-            </button>
-          ))}
+          <SortableContext
+            items={(form?.fields ?? []).map((field) => `layer:${field.id}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            {form?.fields.map((field, index) => (
+              <LayerRow
+                key={field.id}
+                field={field}
+                index={index}
+                selected={selectedFieldId === field.id}
+                onSelect={() => selectField(field.id)}
+              />
+            ))}
+          </SortableContext>
+          <button
+            type="button"
+            onClick={() => selectField(CONFIRMATION_ID)}
+            className={cn(
+              "flex w-full items-center gap-2 rounded-[7px] px-1 py-1 text-left",
+              selectedFieldId === CONFIRMATION_ID
+                ? "bg-card ring-1 ring-[#007AFF]/25"
+                : "hover:bg-card/80"
+            )}
+          >
+            <span className="grid size-6 place-items-center text-[#34C759]">
+              <Icon icon={Tick02Icon} size={12} />
+            </span>
+            <span>
+              <span className="block text-[11px] text-foreground">Confirmation</span>
+              <span className="block text-[9px] text-muted-foreground">System layer</span>
+            </span>
+          </button>
         </div>
       </div>
     </aside>

@@ -9,6 +9,7 @@ import {
   FileDropzone,
   StarRating,
 } from "@/components/fields/controls";
+import { ShowcaseField } from "@/components/fields/showcase-field";
 
 export function FieldPreview({ field }: { field: FormField }) {
   const options = field.options ?? [];
@@ -57,5 +58,8 @@ export function FieldPreview({ field }: { field: FormField }) {
       return <StarRating disabled value={0} max={field.maxRating ?? 5} />;
     case "file":
       return <FileDropzone disabled accept={field.accept} />;
+    case "image":
+    case "richText":
+      return <ShowcaseField field={field} />;
   }
 }

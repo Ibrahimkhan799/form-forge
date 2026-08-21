@@ -25,6 +25,7 @@ import { useFormsStore } from "@/lib/store/forms-store";
 import { useSubmissionsStore } from "@/lib/store/submissions-store";
 import { downloadTextFile, formatDateTime, formatFieldValue, toCsv } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { isInputFieldType } from "@/lib/types";
 
 export function AnalyticsDashboard({ formId }: { formId: string }) {
   const form = useFormsStore((state) => state.forms.find((item) => item.id === formId));
@@ -78,10 +79,11 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
 
   function exportCsv() {
     if (!form) return;
-    const header = ["Submitted at", ...form.fields.map((field) => field.label)];
+    const inputFields = form.fields.filter((field) => isInputFieldType(field.type));
+    const header = ["Submitted at", ...inputFields.map((field) => field.label)];
     const rows = submissions.map((item) => [
       formatDateTime(item.submittedAt),
-      ...form.fields.map((field) => formatFieldValue(item.data[field.id])),
+      ...inputFields.map((field) => formatFieldValue(item.data[field.id])),
     ]);
     downloadTextFile(
       `${form.title || "responses"}.csv`,
@@ -245,18 +247,23 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
             <thead className="bg-muted/45 text-muted-foreground">
               <tr className="border-b border-border/70">
                 <th className="px-4 py-2 font-medium">Submitted</th>
-                {form?.fields.map((field) => (
+                {form?.fields
+                  .filter((field) => isInputFieldType(field.type))
+                  .map((field) => (
                   <th key={field.id} className="px-4 py-2 font-medium">
                     {field.label}
                   </th>
-                ))}
+                  ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={(form?.fields.length ?? 0) + 1}
+                    colSpan={
+                      (form?.fields.filter((field) => isInputFieldType(field.type))
+                        .length ?? 0) + 1
+                    }
                     className="px-4 py-10 text-center text-muted-foreground"
                   >
                     No responses yet.
@@ -271,11 +278,13 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
                     <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground">
                       {formatDateTime(item.submittedAt)}
                     </td>
-                    {form?.fields.map((field) => (
+                    {form?.fields
+                      .filter((field) => isInputFieldType(field.type))
+                      .map((field) => (
                       <td key={field.id} className="max-w-52 truncate px-4 py-2.5">
                         {formatFieldValue(item.data[field.id])}
                       </td>
-                    ))}
+                      ))}
                   </tr>
                 ))
               )}

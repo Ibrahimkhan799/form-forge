@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { FormField } from "@/lib/types";
+import { isInputFieldType, type FormField } from "@/lib/types";
 
 const PHONE_PATTERN = /^[+]?[\d\s().-]{7,20}$/;
 
@@ -9,6 +9,7 @@ function applyRequired<T extends z.ZodTypeAny>(schema: T, required: boolean) {
 }
 
 export function fieldToZod(field: FormField): z.ZodTypeAny {
+  if (!isInputFieldType(field.type)) return z.any().optional();
   const v = field.validation ?? {};
 
   switch (field.type) {
@@ -93,7 +94,7 @@ export function fieldToZod(field: FormField): z.ZodTypeAny {
 export function buildZodSchema(fields: FormField[]) {
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const field of fields) {
-    shape[field.id] = fieldToZod(field);
+    if (isInputFieldType(field.type)) shape[field.id] = fieldToZod(field);
   }
   return z.object(shape);
 }
@@ -114,5 +115,9 @@ export function defaultValueForField(field: FormField): unknown {
 }
 
 export function buildDefaultValues(fields: FormField[]) {
-  return Object.fromEntries(fields.map((field) => [field.id, defaultValueForField(field)]));
+  return Object.fromEntries(
+    fields
+      .filter((field) => isInputFieldType(field.type))
+      .map((field) => [field.id, defaultValueForField(field)])
+  );
 }

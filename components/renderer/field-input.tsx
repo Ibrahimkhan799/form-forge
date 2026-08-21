@@ -162,6 +162,9 @@ export function FieldInput({
                 <FieldError message={fieldState.error?.message} />
               </div>
             );
+          case "image":
+          case "richText":
+            return <></>;
         }
       }}
     />
