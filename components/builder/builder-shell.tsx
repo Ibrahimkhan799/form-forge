@@ -187,7 +187,13 @@ export function BuilderShell({ formId }: { formId: string }) {
           onToggleLeft={toggleLeft}
           onToggleRight={toggleRight}
           onOpenAppearance={openAppearance}
+          onEnterEdit={() => {
+            if (isDesktop) setLeftOpen(true);
+            else setMobilePanel(null);
+          }}
           onEnterPreview={() => {
+            setLeftOpen(false);
+            setRightView("appearance");
             if (isDesktop) setRightOpen(true);
             else setMobilePanel("right");
           }}
@@ -240,16 +246,12 @@ export function BuilderShell({ formId }: { formId: string }) {
 
           {showRight ? (
             <div className="absolute inset-y-0 right-0 z-30 lg:static lg:z-auto">
-              {mode === "preview" || rightView === "appearance" ? (
+              {rightView === "appearance" ? (
                 <AppearancePanel
-                  onShowInspector={
-                    mode === "edit"
-                      ? () => setRightView("inspector")
-                      : undefined
-                  }
+                  onViewChange={setRightView}
                 />
               ) : (
-                <InspectorPanel />
+                <InspectorPanel onViewChange={setRightView} />
               )}
             </div>
           ) : null}

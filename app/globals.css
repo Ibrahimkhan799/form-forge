@@ -144,6 +144,35 @@
   scrollbar-color: color-mix(in srgb, var(--foreground) 18%, transparent) transparent;
 }
 
+.editor-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 34%, transparent)
+    color-mix(in srgb, var(--muted) 75%, transparent);
+  scrollbar-gutter: stable;
+}
+
+.editor-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.editor-scrollbar::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--muted) 75%, transparent);
+  border-left: 1px solid var(--border);
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 34%, transparent);
+  background-clip: padding-box;
+}
+
+.editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 50%, transparent);
+  background-clip: padding-box;
+}
+
 .rich-text-editor:empty::before {
   content: "Start writing…";
   color: var(--muted-foreground);

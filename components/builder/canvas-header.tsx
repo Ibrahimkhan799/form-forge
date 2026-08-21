@@ -80,6 +80,7 @@ export function CanvasHeader({
   onToggleLeft,
   onToggleRight,
   onOpenAppearance,
+  onEnterEdit,
   onEnterPreview,
 }: {
   leftOpen: boolean;
@@ -87,6 +88,7 @@ export function CanvasHeader({
   onToggleLeft: () => void;
   onToggleRight: () => void;
   onOpenAppearance: () => void;
+  onEnterEdit: () => void;
   onEnterPreview: () => void;
 }) {
   const form = useBuilderStore((state) => state.form);
@@ -149,7 +151,10 @@ export function CanvasHeader({
       <div className="flex items-center gap-0.5 rounded-[8px] bg-muted p-0.5">
         <button
           type="button"
-          onClick={() => setMode("edit")}
+          onClick={() => {
+            setMode("edit");
+            onEnterEdit();
+          }}
           className={cn(
             "flex h-7 items-center gap-1 rounded-[7px] px-2.5 text-[11px] transition-all duration-150",
             mode === "edit"

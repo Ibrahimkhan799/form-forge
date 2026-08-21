@@ -17,6 +17,11 @@ import { Button } from "@/components/ui/button";
 import { FontPicker } from "@/components/fonts/font-picker";
 import { Label } from "@/components/ui/label";
 import { useBuilderStore } from "@/lib/store/builder-store";
+import {
+  RightPanelTabs,
+  type RightPanelView,
+} from "@/components/builder/right-panel-tabs";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
 const SWATCHES = [
@@ -141,9 +146,9 @@ function OptionGrid<T extends string>({
 }
 
 export function AppearancePanel({
-  onShowInspector,
+  onViewChange,
 }: {
-  onShowInspector?: () => void;
+  onViewChange: (view: RightPanelView) => void;
 }) {
   const theme = useBuilderStore((state) => state.form?.theme);
   const updateTheme = useBuilderStore((state) => state.updateTheme);
@@ -152,25 +157,17 @@ export function AppearancePanel({
 
   return (
     <aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
-      <div className="border-b border-border/70 px-4 py-3">
-        <div className="flex items-center justify-between">
+      <div className="space-y-3 border-b border-border/70 px-3 py-3">
+        <RightPanelTabs value="appearance" onChange={onViewChange} />
+        <div className="flex items-center justify-between px-1">
           <div>
             <p className="text-[10px] text-muted-foreground">Form theme</p>
             <h2 className="mt-0.5 text-[13px] font-semibold">Appearance</h2>
           </div>
-          {onShowInspector ? (
-            <Button
-              variant="ghost"
-              className="h-7 px-2 text-[10px]"
-              onClick={onShowInspector}
-            >
-              Properties
-            </Button>
-          ) : null}
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-4">
+      <div className="editor-scrollbar min-h-0 flex-1 space-y-5 overflow-y-scroll overscroll-contain px-4 py-4">
           <Section title="Accent" description="Used for actions, focus, and selection.">
             <div className="flex flex-wrap items-center gap-2">
               {SWATCHES.map((color) => (
@@ -293,15 +290,15 @@ export function AppearancePanel({
                     {theme.borderRadius}px
                   </span>
                 </div>
-                <input
-                  type="range"
+                <Slider
+                  label="Form corner radius"
                   min={4}
                   max={24}
                   value={theme.borderRadius}
-                  onChange={(event) =>
-                    updateTheme({ borderRadius: Number(event.target.value) })
+                  onValueChange={(borderRadius) =>
+                    updateTheme({ borderRadius })
                   }
-                  className="mt-2 w-full accent-[#007AFF]"
+                  className="mt-2"
                 />
               </div>
             </div>
