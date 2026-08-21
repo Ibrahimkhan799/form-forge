@@ -75,6 +75,7 @@ export function fieldToZod(field: FormField): z.ZodTypeAny {
     }
     case "file": {
       const schema = z.object({
+        id: z.string(),
         name: z.string(),
         size: z.number(),
         type: z.string(),

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Controller, type Control } from "react-hook-form";
 import type { FormField } from "@/lib/types";
+import type { StoredAssetRef } from "@/lib/types";
 import {
   AppleCheckbox,
   AppleRadio,
@@ -155,7 +156,7 @@ export function FieldInput({
             return (
               <div>
                 <FileDropzone
-                  value={rhf.value as { name: string; size: number; type: string } | null}
+                  value={rhf.value as StoredAssetRef | null}
                   accept={field.accept}
                   onChange={rhf.onChange}
                 />

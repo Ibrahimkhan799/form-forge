@@ -6,6 +6,7 @@ import {
   ArrowRight01Icon,
   Calendar03Icon,
   CloudUploadIcon,
+  Loading03Icon,
   StarIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
@@ -27,6 +28,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { StoredAssetRef } from "@/lib/types";
+import { storeUpload } from "@/lib/upload-store";
 
 export function AppleRadio({
   checked,
@@ -286,16 +289,30 @@ export function FileDropzone({
   onChange,
   disabled,
 }: {
-  value?: { name: string; size: number; type: string } | null;
+  value?: StoredAssetRef | null;
   accept?: string;
-  onChange?: (file: { name: string; size: number; type: string } | null) => void;
+  onChange?: (file: StoredAssetRef | null) => void;
   disabled?: boolean;
 }) {
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function takeFile(file?: File) {
+  async function takeFile(file?: File) {
     if (!file) return;
-    onChange?.({ name: file.name, size: file.size, type: file.type });
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Files must be smaller than 10 MB");
+      return;
+    }
+    setError(null);
+    setUploading(true);
+    try {
+      onChange?.(await storeUpload(file));
+    } catch {
+      setError("Upload failed. Try again.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -315,23 +332,31 @@ export function FileDropzone({
         dragging
           ? "border-[var(--ff-primary,#007AFF)] bg-[color-mix(in_srgb,var(--ff-primary,#007AFF)_8%,transparent)]"
           : "border-[#D2D2D7] bg-[#FAFAFA] hover:border-[#B0B0B5] dark:border-white/15 dark:bg-white/5",
-        disabled && "cursor-default"
+        (disabled || uploading) && "cursor-default"
       )}
     >
-      <Icon icon={CloudUploadIcon} size={28} className="text-[#86868B]" />
+      <Icon
+        icon={uploading ? Loading03Icon : CloudUploadIcon}
+        size={28}
+        className={cn("text-[#86868B]", uploading && "animate-spin")}
+      />
       <div>
         <p className="text-[15px] text-[#1D1D1F] dark:text-white">
-          {value?.name || "Drop a file here or browse"}
+          {uploading ? "Uploading…" : value?.name || "Drop a file here or browse"}
         </p>
         <p className="mt-1 text-[13px] text-[#86868B]">
-          {value ? `${Math.ceil(value.size / 1024)} KB` : "PNG, JPG, or PDF"}
+          {error
+            ? error
+            : value
+              ? `${Math.ceil(value.size / 1024)} KB · stored securely in this browser`
+              : "PNG, JPG, or PDF · up to 10 MB"}
         </p>
       </div>
       <input
         type="file"
         accept={accept}
         className="sr-only"
-        disabled={disabled}
+        disabled={disabled || uploading}
         onChange={(event) => takeFile(event.target.files?.[0])}
       />
     </label>

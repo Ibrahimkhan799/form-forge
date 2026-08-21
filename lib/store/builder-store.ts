@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { current } from "immer";
 import { immer } from "zustand/middleware/immer";
 import { temporal } from "zundo";
 import { useStore } from "zustand";
@@ -139,7 +140,7 @@ export const useBuilderStore = create<BuilderState>()(
           const index = state.form.fields.findIndex((item) => item.id === id);
           if (index === -1) return;
           const original = state.form.fields[index];
-          const copy = structuredClone(original);
+          const copy = structuredClone(current(original));
           copy.id = `${original.id}-copy-${Date.now().toString(36)}`;
           if (copy.options) {
             copy.options = copy.options.map((option) => ({
@@ -171,7 +172,7 @@ export const useBuilderStore = create<BuilderState>()(
           next.helpText = previous.helpText;
           next.required = previous.required;
           next.placeholder = previous.placeholder;
-          next.componentStyle = structuredClone(previous.componentStyle);
+          next.componentStyle = { ...previous.componentStyle };
           if (previous.options && next.options) next.options = previous.options;
           state.form.fields[index] = next;
           touch(state.form);

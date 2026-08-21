@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { DEFAULT_THEME } from "@/lib/constants";
 import {
   BACKGROUND_STYLES,
@@ -16,13 +15,6 @@ import type {
 } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FontPicker } from "@/components/fonts/font-picker";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useBuilderStore } from "@/lib/store/builder-store";
 import { cn } from "@/lib/utils";
@@ -148,41 +140,37 @@ function OptionGrid<T extends string>({
   );
 }
 
-export function ThemeCustomizer({
-  open,
-  onOpenChange,
+export function AppearancePanel({
+  onShowInspector,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onShowInspector?: () => void;
 }) {
   const theme = useBuilderStore((state) => state.form?.theme);
   const updateTheme = useBuilderStore((state) => state.updateTheme);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const frame = requestAnimationFrame(() => {
-      scrollAreaRef.current?.scrollTo({ top: 0 });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [open]);
 
   if (!theme) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-3 bottom-3 grid h-auto max-h-none w-[min(560px,calc(100vw-24px))] max-w-none -translate-y-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-[12px] p-0">
-        <DialogHeader className="border-b border-border/70 px-4 py-3.5">
-          <DialogTitle>Appearance</DialogTitle>
-          <DialogDescription>
-            Fine-tune color, typography, spacing, and form controls.
-          </DialogDescription>
-        </DialogHeader>
+    <aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+      <div className="border-b border-border/70 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] text-muted-foreground">Form theme</p>
+            <h2 className="mt-0.5 text-[13px] font-semibold">Appearance</h2>
+          </div>
+          {onShowInspector ? (
+            <Button
+              variant="ghost"
+              className="h-7 px-2 text-[10px]"
+              onClick={onShowInspector}
+            >
+              Properties
+            </Button>
+          ) : null}
+        </div>
+      </div>
 
-        <div
-          ref={scrollAreaRef}
-          className="min-h-0 space-y-5 overflow-y-auto overscroll-contain px-4 py-4"
-        >
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-4">
           <Section title="Accent" description="Used for actions, focus, and selection.">
             <div className="flex flex-wrap items-center gap-2">
               {SWATCHES.map((color) => (
@@ -318,19 +306,18 @@ export function ThemeCustomizer({
               </div>
             </div>
           </Section>
-        </div>
+      </div>
 
-        <div className="flex items-center justify-between border-t border-border/70 bg-popover px-4 py-2.5">
-          <p className="text-[10px] text-muted-foreground">Changes autosave</p>
-          <Button
-            variant="outline"
-            className="h-8 rounded-[8px] text-[12px]"
-            onClick={() => updateTheme({ ...DEFAULT_THEME })}
-          >
-            Reset appearance
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      <div className="flex items-center justify-between border-t border-border/70 bg-card px-4 py-2.5">
+        <p className="text-[10px] text-muted-foreground">Changes autosave</p>
+        <Button
+          variant="outline"
+          className="h-7 text-[10px]"
+          onClick={() => updateTheme({ ...DEFAULT_THEME })}
+        >
+          Reset
+        </Button>
+      </div>
+    </aside>
   );
 }

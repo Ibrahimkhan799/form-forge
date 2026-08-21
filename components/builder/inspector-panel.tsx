@@ -5,6 +5,7 @@ import { CONFIRMATION_ID, FIELD_TYPE_META } from "@/lib/constants";
 import { createId } from "@/lib/id";
 import { isInputFieldType, type ComponentStyle, type FormField } from "@/lib/types";
 import { Icon } from "@/components/icon";
+import { AssetUpload } from "@/components/fields/asset-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -285,6 +286,12 @@ export function InspectorPanel() {
 
       {field.type === "image" ? (
         <>
+          <FieldRow label="Upload">
+            <AssetUpload
+              value={field.imageAsset}
+              onChange={(imageAsset) => updateField(field.id, { imageAsset })}
+            />
+          </FieldRow>
           <FieldRow label="Image URL">
             <Textarea
               value={field.imageUrl ?? ""}

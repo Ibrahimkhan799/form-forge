@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -16,14 +16,27 @@ import { FIELD_TYPE_META } from "@/lib/constants";
 import type { FieldType } from "@/lib/types";
 import { CanvasHeader } from "@/components/builder/canvas-header";
 import { ComponentLibrary } from "@/components/builder/component-library";
+import { LayersPanel } from "@/components/builder/layers-panel";
+import type { LeftPanelView } from "@/components/builder/left-panel-tabs";
 import { FormCanvas } from "@/components/builder/form-canvas";
 import { InspectorPanel } from "@/components/builder/inspector-panel";
+import { AppearancePanel } from "@/components/builder/theme-customizer";
 import { FormPlayer } from "@/components/renderer/form-player";
 import { Icon } from "@/components/icon";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useBuilderShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useBuilderStore } from "@/lib/store/builder-store";
 import { useFormsStore } from "@/lib/store/forms-store";
+
+function subscribeToDesktop(callback: () => void) {
+  const query = window.matchMedia("(min-width: 1024px)");
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
+function getIsDesktop() {
+  return window.matchMedia("(min-width: 1024px)").matches;
+}
 
 export function BuilderShell({ formId }: { formId: string }) {
   const loadForm = useBuilderStore((state) => state.loadForm);
@@ -38,6 +51,18 @@ export function BuilderShell({ formId }: { formId: string }) {
     null
   );
   const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+  const isDesktop = useSyncExternalStore(
+    subscribeToDesktop,
+    getIsDesktop,
+    () => true
+  );
+  const [leftView, setLeftView] = useState<LeftPanelView>("library");
+  const [rightView, setRightView] = useState<"inspector" | "appearance">(
+    "inspector"
+  );
+  const [leftOpen, setLeftOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState<"left" | "right" | null>(null);
 
   useAutosave();
   useBuilderShortcuts();
@@ -52,6 +77,25 @@ export function BuilderShell({ formId }: { formId: string }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
+
+  const showLeft = isDesktop ? leftOpen : mobilePanel === "left";
+  const showRight = isDesktop ? rightOpen : mobilePanel === "right";
+
+  function toggleLeft() {
+    if (isDesktop) setLeftOpen((value) => !value);
+    else setMobilePanel((value) => (value === "left" ? null : "left"));
+  }
+
+  function toggleRight() {
+    if (isDesktop) setRightOpen((value) => !value);
+    else setMobilePanel((value) => (value === "right" ? null : "right"));
+  }
+
+  function openAppearance() {
+    setRightView("appearance");
+    if (isDesktop) setRightOpen(true);
+    else setMobilePanel("right");
+  }
 
   function handleDragStart(event: DragStartEvent) {
     const id = String(event.active.id);
@@ -137,34 +181,79 @@ export function BuilderShell({ formId }: { formId: string }) {
       onDragCancel={clearDragPreview}
     >
       <div className="fixed inset-0 flex h-dvh w-screen flex-col overflow-hidden bg-background">
-        <CanvasHeader />
-        <AnimatePresence mode="wait">
-          {mode === "preview" ? (
-            <motion.div
-              key="preview"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18, ease: "easeInOut" }}
-              className="min-h-0 flex-1 overflow-hidden"
-            >
-              <FormPlayer form={form} preview />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="edit"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18, ease: "easeInOut" }}
-              className="flex min-h-0 flex-1 overflow-hidden"
-            >
-              <ComponentLibrary />
-              <FormCanvas />
-              <InspectorPanel />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <CanvasHeader
+          leftOpen={showLeft}
+          rightOpen={showRight}
+          onToggleLeft={toggleLeft}
+          onToggleRight={toggleRight}
+          onOpenAppearance={openAppearance}
+          onEnterPreview={() => {
+            if (isDesktop) setRightOpen(true);
+            else setMobilePanel("right");
+          }}
+        />
+        <div className="relative flex min-h-0 flex-1 overflow-hidden">
+          {!isDesktop && mobilePanel ? (
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              onClick={() => setMobilePanel(null)}
+              className="absolute inset-0 z-20 bg-black/15 backdrop-blur-[1px]"
+            />
+          ) : null}
+
+          {showLeft ? (
+            <div className="absolute inset-y-0 left-0 z-30 lg:static lg:z-auto">
+              {leftView === "library" ? (
+                <ComponentLibrary onViewChange={setLeftView} />
+              ) : (
+                <LayersPanel onViewChange={setLeftView} />
+              )}
+            </div>
+          ) : null}
+
+          <AnimatePresence mode="wait">
+            {mode === "preview" ? (
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.16, ease: "easeInOut" }}
+                className="min-h-0 min-w-0 flex-1 overflow-hidden"
+              >
+                <FormPlayer form={form} preview />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="edit"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.16, ease: "easeInOut" }}
+                className="flex min-h-0 min-w-0 flex-1 overflow-hidden"
+              >
+                <FormCanvas />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {showRight ? (
+            <div className="absolute inset-y-0 right-0 z-30 lg:static lg:z-auto">
+              {mode === "preview" || rightView === "appearance" ? (
+                <AppearancePanel
+                  onShowInspector={
+                    mode === "edit"
+                      ? () => setRightView("inspector")
+                      : undefined
+                  }
+                />
+              ) : (
+                <InspectorPanel />
+              )}
+            </div>
+          ) : null}
+        </div>
       </div>
       {activeDragId && dragPosition ? (
         <div
