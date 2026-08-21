@@ -45,7 +45,7 @@ function PanelShell({
   children: React.ReactNode;
 }) {
   return (
-    <aside className="flex min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+    <aside className="flex h-full min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
       <div className="space-y-3 border-b border-border/80 px-3 py-3">
         <RightPanelTabs value="inspector" onChange={onViewChange} />
         <div>
