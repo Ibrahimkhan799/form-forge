@@ -31,6 +31,12 @@ export const DEFAULT_THEME: FormTheme = {
   fontFamily: "sf-pro",
   backgroundColor: "#FFFFFF",
   textColor: "#1D1D1F",
+  surfaceColor: "#FFFFFF",
+  inputBackgroundColor: "#FFFFFF",
+  inputBorderColor: "#D2D2D7",
+  density: "comfortable",
+  buttonStyle: "solid",
+  width: "standard",
 };
 
 export const DEFAULT_CONFIRMATION: FormConfirmation = {
@@ -42,9 +48,14 @@ export const DEFAULT_CONFIRMATION: FormConfirmation = {
 export const FONT_STACKS: Record<FormTheme["fontFamily"], string> = {
   "sf-pro":
     '"SF Pro Display", "SF Pro Text", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  inter: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  inter: 'var(--font-inter), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  "dm-sans": 'var(--font-dm-sans), "DM Sans", sans-serif',
+  manrope: 'var(--font-manrope), Manrope, sans-serif',
+  "space-grotesk": 'var(--font-space-grotesk), "Space Grotesk", sans-serif',
+  playfair: 'var(--font-playfair), "Playfair Display", Georgia, serif',
+  "source-serif": 'var(--font-source-serif), "Source Serif 4", Georgia, serif',
   georgia: 'Georgia, "Times New Roman", serif',
-  mono: '"SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace',
+  mono: 'var(--font-jetbrains-mono), "SF Mono", ui-monospace, Menlo, monospace',
 };
 
 export interface FieldTypeMeta {
@@ -230,6 +241,10 @@ export function cloneSnapshot(form: FormDocument): FormVersion["snapshot"] {
 export function normalizeFormDocument(form: FormDocument): FormDocument {
   return {
     ...form,
+    theme: {
+      ...DEFAULT_THEME,
+      ...(form.theme ?? {}),
+    },
     displayMode: form.displayMode ?? "conversational",
     confirmation: {
       ...DEFAULT_CONFIRMATION,
@@ -239,6 +254,10 @@ export function normalizeFormDocument(form: FormDocument): FormDocument {
       ...version,
       snapshot: {
         ...version.snapshot,
+        theme: {
+          ...DEFAULT_THEME,
+          ...(version.snapshot.theme ?? form.theme ?? {}),
+        },
         displayMode: version.snapshot.displayMode ?? form.displayMode ?? "conversational",
         confirmation: {
           ...DEFAULT_CONFIRMATION,

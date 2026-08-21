@@ -1,8 +1,20 @@
 "use client";
 
-import { FONT_STACKS } from "@/lib/constants";
-import { FONT_FAMILIES, BACKGROUND_STYLES } from "@/lib/types";
-import type { BackgroundStyle, FontFamily } from "@/lib/types";
+import { DEFAULT_THEME, FONT_STACKS } from "@/lib/constants";
+import {
+  BACKGROUND_STYLES,
+  BUTTON_STYLES,
+  FONT_FAMILIES,
+  FORM_DENSITIES,
+  FORM_WIDTHS,
+} from "@/lib/types";
+import type {
+  BackgroundStyle,
+  FontFamily,
+  FormButtonStyle,
+  FormDensity,
+  FormWidth,
+} from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,13 +27,26 @@ import { Label } from "@/components/ui/label";
 import { useBuilderStore } from "@/lib/store/builder-store";
 import { cn } from "@/lib/utils";
 
-const SWATCHES = ["#007AFF", "#34C759", "#FF3B30", "#AF52DE", "#FF9500", "#1D1D1F"];
+const SWATCHES = [
+  "#007AFF",
+  "#5856D6",
+  "#AF52DE",
+  "#34C759",
+  "#FF9500",
+  "#FF3B30",
+  "#1D1D1F",
+];
 
 const FONT_LABELS: Record<FontFamily, string> = {
   "sf-pro": "SF Pro",
   inter: "Inter",
+  "dm-sans": "DM Sans",
+  manrope: "Manrope",
+  "space-grotesk": "Space Grotesk",
+  playfair: "Playfair Display",
+  "source-serif": "Source Serif",
   georgia: "Georgia",
-  mono: "Mono",
+  mono: "JetBrains Mono",
 };
 
 const STYLE_LABELS: Record<BackgroundStyle, string> = {
@@ -29,6 +54,111 @@ const STYLE_LABELS: Record<BackgroundStyle, string> = {
   gradient: "Gradient",
   dots: "Dots",
 };
+
+const DENSITY_LABELS: Record<FormDensity, string> = {
+  compact: "Compact",
+  comfortable: "Comfortable",
+  spacious: "Spacious",
+};
+
+const BUTTON_LABELS: Record<FormButtonStyle, string> = {
+  solid: "Solid",
+  soft: "Soft",
+  outline: "Outline",
+};
+
+const WIDTH_LABELS: Record<FormWidth, string> = {
+  narrow: "Narrow",
+  standard: "Standard",
+  wide: "Wide",
+};
+
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-b border-[#E5E5EA] pb-5 last:border-0 last:pb-0 dark:border-white/10">
+      <div className="mb-3">
+        <h3 className="text-[13px] font-medium text-[#1D1D1F] dark:text-white">{title}</h3>
+        {description ? (
+          <p className="mt-0.5 text-[12px] text-[#86868B]">{description}</p>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ColorControl({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-3 rounded-[10px] border border-[#E5E5EA] px-3 py-2 dark:border-white/10">
+      <span className="text-[12px] text-[#1D1D1F] dark:text-white">{label}</span>
+      <span className="flex items-center gap-2">
+        <span className="font-mono text-[11px] text-[#86868B]">{value.toUpperCase()}</span>
+        <span
+          className="relative size-6 overflow-hidden rounded-full ring-1 ring-black/10"
+          style={{ background: value }}
+        >
+          <input
+            type="color"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            className="absolute -inset-2 size-10 cursor-pointer opacity-0"
+            aria-label={label}
+          />
+        </span>
+      </span>
+    </label>
+  );
+}
+
+function OptionGrid<T extends string>({
+  values,
+  selected,
+  labels,
+  onChange,
+  columns = 3,
+}: {
+  values: readonly T[];
+  selected: T;
+  labels: Record<T, string>;
+  onChange: (value: T) => void;
+  columns?: 2 | 3;
+}) {
+  return (
+    <div className={cn("grid gap-1.5", columns === 2 ? "grid-cols-2" : "grid-cols-3")}>
+      {values.map((value) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => onChange(value)}
+          className={cn(
+            "h-8 rounded-[8px] border px-2 text-[12px] transition-colors",
+            selected === value
+              ? "border-[#007AFF] bg-[#007AFF]/6 text-[#007AFF]"
+              : "border-[#E5E5EA] text-[#86868B] hover:text-[#1D1D1F] dark:border-white/10 dark:hover:text-white"
+          )}
+        >
+          {labels[value]}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function ThemeCustomizer({
   open,
@@ -44,27 +174,26 @@ export function ThemeCustomizer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-2xl p-6 sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Theme</DialogTitle>
+      <DialogContent className="grid h-[min(760px,calc(100dvh-32px))] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl p-0 sm:max-w-xl">
+        <DialogHeader className="border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
+          <DialogTitle>Appearance</DialogTitle>
           <DialogDescription>
-            Customize how the published form looks for respondents.
+            Fine-tune color, typography, spacing, and form controls.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5">
-          <div>
-            <Label className="text-[13px] font-normal text-[#86868B]">Accent color</Label>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="space-y-5 overflow-y-auto overscroll-contain px-5 py-4">
+          <Section title="Accent" description="Used for actions, focus, and selection.">
+            <div className="flex flex-wrap items-center gap-2">
               {SWATCHES.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => updateTheme({ primaryColor: color })}
-                  aria-label={color}
+                  aria-label={`Use ${color}`}
                   className={cn(
-                    "size-8 rounded-full transition-transform duration-150",
-                    theme.primaryColor === color ? "scale-110 ring-2 ring-offset-2" : ""
+                    "size-7 rounded-full ring-offset-2 transition-transform",
+                    theme.primaryColor === color && "scale-105 ring-2"
                   )}
                   style={{
                     background: color,
@@ -72,51 +201,62 @@ export function ThemeCustomizer({
                   }}
                 />
               ))}
-              <label className="grid size-8 place-items-center overflow-hidden rounded-full border border-[#D2D2D7]">
-                <input
-                  type="color"
-                  value={theme.primaryColor}
-                  onChange={(event) => updateTheme({ primaryColor: event.target.value })}
-                  className="size-10 -translate-x-1 -translate-y-1 cursor-pointer"
+            </div>
+          </Section>
+
+          <Section title="Colors" description="Set the page, card, text, and input palette.">
+            <div className="grid grid-cols-2 gap-2">
+              <ColorControl
+                label="Page"
+                value={theme.backgroundColor}
+                onChange={(backgroundColor) => updateTheme({ backgroundColor })}
+              />
+              <ColorControl
+                label="Form card"
+                value={theme.surfaceColor}
+                onChange={(surfaceColor) => updateTheme({ surfaceColor })}
+              />
+              <ColorControl
+                label="Text"
+                value={theme.textColor}
+                onChange={(textColor) => updateTheme({ textColor })}
+              />
+              <ColorControl
+                label="Input fill"
+                value={theme.inputBackgroundColor}
+                onChange={(inputBackgroundColor) => updateTheme({ inputBackgroundColor })}
+              />
+              <div className="col-span-2">
+                <ColorControl
+                  label="Input border"
+                  value={theme.inputBorderColor}
+                  onChange={(inputBorderColor) => updateTheme({ inputBorderColor })}
                 />
-              </label>
+              </div>
             </div>
-          </div>
+          </Section>
 
-          <div>
-            <Label className="text-[13px] font-normal text-[#86868B]">Background style</Label>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {BACKGROUND_STYLES.map((style) => (
-                <button
-                  key={style}
-                  type="button"
-                  onClick={() => updateTheme({ backgroundStyle: style })}
-                  className={cn(
-                    "rounded-xl border px-3 py-3 text-[13px] transition-colors duration-150",
-                    theme.backgroundStyle === style
-                      ? "border-[#007AFF] text-[#007AFF]"
-                      : "border-[#E5E5EA] text-[#1D1D1F] dark:border-white/10 dark:text-white"
-                  )}
-                >
-                  {STYLE_LABELS[style]}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Section title="Background">
+            <OptionGrid
+              values={BACKGROUND_STYLES}
+              selected={theme.backgroundStyle}
+              labels={STYLE_LABELS}
+              onChange={(backgroundStyle) => updateTheme({ backgroundStyle })}
+            />
+          </Section>
 
-          <div>
-            <Label className="text-[13px] font-normal text-[#86868B]">Font family</Label>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+          <Section title="Google fonts" description="Fonts are embedded and served by Next.js.">
+            <div className="grid grid-cols-2 gap-1.5">
               {FONT_FAMILIES.map((font) => (
                 <button
                   key={font}
                   type="button"
                   onClick={() => updateTheme({ fontFamily: font })}
                   className={cn(
-                    "rounded-xl border px-3 py-3 text-[13px] transition-colors duration-150",
+                    "flex h-10 items-center rounded-[8px] border px-3 text-left text-[13px] transition-colors",
                     theme.fontFamily === font
-                      ? "border-[#007AFF] text-[#007AFF]"
-                      : "border-[#E5E5EA] text-[#1D1D1F] dark:border-white/10 dark:text-white"
+                      ? "border-[#007AFF] bg-[#007AFF]/6 text-[#007AFF]"
+                      : "border-[#E5E5EA] text-[#1D1D1F] hover:bg-[#F5F5F7] dark:border-white/10 dark:text-white dark:hover:bg-white/5"
                   )}
                   style={{ fontFamily: FONT_STACKS[font] }}
                 >
@@ -124,45 +264,70 @@ export function ThemeCustomizer({
                 </button>
               ))}
             </div>
-          </div>
+          </Section>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <Label className="text-[13px] font-normal text-[#86868B]">Corner radius</Label>
-              <span className="text-[13px] text-[#1D1D1F] dark:text-white">
-                {theme.borderRadius}px
-              </span>
+          <Section title="Layout">
+            <div className="space-y-3">
+              <div>
+                <Label className="mb-2 text-[12px] font-normal text-[#86868B]">Density</Label>
+                <OptionGrid
+                  values={FORM_DENSITIES}
+                  selected={theme.density}
+                  labels={DENSITY_LABELS}
+                  onChange={(density) => updateTheme({ density })}
+                />
+              </div>
+              <div>
+                <Label className="mb-2 text-[12px] font-normal text-[#86868B]">Form width</Label>
+                <OptionGrid
+                  values={FORM_WIDTHS}
+                  selected={theme.width}
+                  labels={WIDTH_LABELS}
+                  onChange={(width) => updateTheme({ width })}
+                />
+              </div>
+              <div>
+                <Label className="mb-2 text-[12px] font-normal text-[#86868B]">Button style</Label>
+                <OptionGrid
+                  values={BUTTON_STYLES}
+                  selected={theme.buttonStyle}
+                  labels={BUTTON_LABELS}
+                  onChange={(buttonStyle) => updateTheme({ buttonStyle })}
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-[12px] font-normal text-[#86868B]">
+                    Corner radius
+                  </Label>
+                  <span className="text-[12px] text-[#1D1D1F] dark:text-white">
+                    {theme.borderRadius}px
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={4}
+                  max={24}
+                  value={theme.borderRadius}
+                  onChange={(event) =>
+                    updateTheme({ borderRadius: Number(event.target.value) })
+                  }
+                  className="mt-2 w-full accent-[#007AFF]"
+                />
+              </div>
             </div>
-            <input
-              type="range"
-              min={8}
-              max={24}
-              value={theme.borderRadius}
-              onChange={(event) =>
-                updateTheme({ borderRadius: Number(event.target.value) })
-              }
-              className="mt-3 w-full accent-[#007AFF]"
-            />
-          </div>
+          </Section>
+        </div>
 
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              className="h-8 rounded-[8px]"
-              onClick={() =>
-                updateTheme({
-                  primaryColor: "#007AFF",
-                  borderRadius: 12,
-                  backgroundStyle: "solid",
-                  fontFamily: "sf-pro",
-                  backgroundColor: "#FFFFFF",
-                  textColor: "#1D1D1F",
-                })
-              }
-            >
-              Reset
-            </Button>
-          </div>
+        <div className="flex items-center justify-between border-t border-[#E5E5EA] px-5 py-3 dark:border-white/10">
+          <p className="text-[11px] text-[#86868B]">Changes autosave</p>
+          <Button
+            variant="outline"
+            className="h-8 rounded-[8px] text-[12px]"
+            onClick={() => updateTheme({ ...DEFAULT_THEME })}
+          >
+            Reset appearance
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

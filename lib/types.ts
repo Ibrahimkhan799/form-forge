@@ -44,6 +44,11 @@ export interface FormField {
 export const FONT_FAMILIES = [
   "sf-pro",
   "inter",
+  "dm-sans",
+  "manrope",
+  "space-grotesk",
+  "playfair",
+  "source-serif",
   "georgia",
   "mono",
 ] as const;
@@ -54,6 +59,15 @@ export const BACKGROUND_STYLES = ["solid", "gradient", "dots"] as const;
 
 export type BackgroundStyle = (typeof BACKGROUND_STYLES)[number];
 
+export const FORM_DENSITIES = ["compact", "comfortable", "spacious"] as const;
+export type FormDensity = (typeof FORM_DENSITIES)[number];
+
+export const BUTTON_STYLES = ["solid", "soft", "outline"] as const;
+export type FormButtonStyle = (typeof BUTTON_STYLES)[number];
+
+export const FORM_WIDTHS = ["narrow", "standard", "wide"] as const;
+export type FormWidth = (typeof FORM_WIDTHS)[number];
+
 export interface FormTheme {
   primaryColor: string;
   borderRadius: number;
@@ -61,6 +75,12 @@ export interface FormTheme {
   fontFamily: FontFamily;
   backgroundColor: string;
   textColor: string;
+  surfaceColor: string;
+  inputBackgroundColor: string;
+  inputBorderColor: string;
+  density: FormDensity;
+  buttonStyle: FormButtonStyle;
+  width: FormWidth;
 }
 
 export type FormDisplayMode = "conversational" | "classic";
