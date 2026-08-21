@@ -13,6 +13,12 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useBuilderStore, useSelectedField } from "@/lib/store/builder-store";
+import {
+  RightPanelTabs,
+  type RightPanelView,
+} from "@/components/builder/right-panel-tabs";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 function FieldRow({
@@ -32,20 +38,25 @@ function FieldRow({
 
 function PanelShell({
   title,
+  onViewChange,
   children,
 }: {
   title: string;
+  onViewChange: (view: RightPanelView) => void;
   children: React.ReactNode;
 }) {
   return (
-    <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card">
-      <div className="border-b border-border/80 px-4 py-3">
-        <p className="text-[10px] text-muted-foreground">Inspector</p>
-        <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">{title}</h2>
+    <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+      <div className="space-y-3 border-b border-border/80 px-3 py-3">
+        <RightPanelTabs value="inspector" onChange={onViewChange} />
+        <div>
+          <p className="text-[10px] text-muted-foreground">Inspector</p>
+          <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">{title}</h2>
+        </div>
       </div>
-      <div className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-3">
-        {children}
-      </div>
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-4 px-4 py-3 pr-5">{children}</div>
+      </ScrollArea>
     </aside>
   );
 }
@@ -196,33 +207,33 @@ function StyleEditor({ field }: { field: FormField }) {
         </FieldRow>
       </div>
       <FieldRow label={`Padding · ${style.padding}px`}>
-        <input
-          type="range"
+        <Slider
+          label="Layer padding"
           min={0}
           max={40}
           step={4}
           value={style.padding}
-          onChange={(event) => updateStyle({ padding: Number(event.target.value) })}
-          className="w-full accent-[#007AFF]"
+          onValueChange={(padding) => updateStyle({ padding })}
         />
       </FieldRow>
       <FieldRow label={`Corner radius · ${style.borderRadius ?? 0}px`}>
-        <input
-          type="range"
+        <Slider
+          label="Layer corner radius"
           min={0}
           max={24}
           value={style.borderRadius ?? 0}
-          onChange={(event) =>
-            updateStyle({ borderRadius: Number(event.target.value) })
-          }
-          className="w-full accent-[#007AFF]"
+          onValueChange={(borderRadius) => updateStyle({ borderRadius })}
         />
       </FieldRow>
     </div>
   );
 }
 
-export function InspectorPanel() {
+export function InspectorPanel({
+  onViewChange,
+}: {
+  onViewChange: (view: RightPanelView) => void;
+}) {
   const field = useSelectedField();
   const form = useBuilderStore((state) => state.form);
   const selectedFieldId = useBuilderStore((state) => state.selectedFieldId);
@@ -231,7 +242,7 @@ export function InspectorPanel() {
 
   if (selectedFieldId === CONFIRMATION_ID && form) {
     return (
-      <PanelShell title="Confirmation">
+      <PanelShell title="Confirmation" onViewChange={onViewChange}>
         <FieldRow label="Title">
           <Input
             value={form.confirmation.title}
@@ -262,7 +273,7 @@ export function InspectorPanel() {
 
   if (!field) {
     return (
-      <PanelShell title="Nothing selected">
+      <PanelShell title="Nothing selected" onViewChange={onViewChange}>
         <p className="text-[11px] leading-4 text-muted-foreground">
           Select a layer on the canvas or in the Layers panel to edit it.
         </p>
@@ -276,7 +287,10 @@ export function InspectorPanel() {
     field.type === "dropdown" || field.type === "radio" || field.type === "checkbox";
 
   return (
-    <PanelShell title={FIELD_TYPE_META[field.type].label}>
+    <PanelShell
+      title={FIELD_TYPE_META[field.type].label}
+      onViewChange={onViewChange}
+    >
       <FieldRow label={isInput ? "Label" : "Layer name"}>
         <Input
           value={field.label}
