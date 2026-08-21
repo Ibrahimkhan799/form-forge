@@ -25,6 +25,7 @@ import { ThemeCustomizer } from "@/components/builder/theme-customizer";
 import { VersionHistory } from "@/components/builder/version-history";
 import { ShareDialog } from "@/components/builder/share-dialog";
 import { SchemaDialog } from "@/components/builder/schema-dialog";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useBuilderStore, useBuilderTemporal } from "@/lib/store/builder-store";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -51,7 +52,7 @@ function HeaderButton({
             size="icon"
             disabled={disabled}
             onClick={onClick}
-            className="size-7 rounded-[7px] text-[#1D1D1F] hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
+            className="size-7 rounded-[7px] text-foreground hover:bg-muted"
           />
         }
       >
@@ -81,11 +82,11 @@ export function CanvasHeader() {
   if (!form) return null;
 
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-[#E5E5EA] bg-white px-3 dark:border-white/10 dark:bg-[#1C1C1E]">
+    <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border/80 bg-card px-3">
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Link
           href="/"
-          className="grid size-7 place-items-center rounded-[7px] text-[#1D1D1F] transition-colors duration-150 hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
+          className="grid size-7 place-items-center rounded-[7px] text-foreground transition-colors duration-150 hover:bg-muted"
           aria-label="Back to dashboard"
         >
           <Icon icon={ArrowLeft01Icon} size={18} />
@@ -96,7 +97,7 @@ export function CanvasHeader() {
             onChange={(event) => setTitle(event.target.value)}
             className="h-6 max-w-48 border-transparent bg-transparent px-1 text-[13px] font-semibold shadow-none focus-visible:border-[#007AFF] focus-visible:ring-[#007AFF]/20"
           />
-          <div className="flex items-center gap-1 px-1 text-[10px] text-[#86868B]">
+          <div className="flex items-center gap-1 px-1 text-[10px] text-muted-foreground">
             {saveStatus === "saving" ? (
               <Icon icon={Loading03Icon} size={12} className="animate-spin" />
             ) : saveStatus === "unsaved" ? (
@@ -115,15 +116,15 @@ export function CanvasHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-0.5 rounded-[9px] bg-[#F5F5F7] p-0.5 dark:bg-white/10">
+      <div className="flex items-center gap-0.5 rounded-[8px] bg-muted p-0.5">
         <button
           type="button"
           onClick={() => setMode("edit")}
           className={cn(
             "flex h-7 items-center gap-1 rounded-[7px] px-2.5 text-[11px] transition-all duration-150",
             mode === "edit"
-              ? "bg-white text-[#1D1D1F] shadow-sm dark:bg-[#2C2C2E] dark:text-white"
-              : "text-[#86868B]"
+              ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              : "text-muted-foreground"
           )}
         >
           <Icon icon={PencilEdit01Icon} size={14} />
@@ -135,8 +136,8 @@ export function CanvasHeader() {
           className={cn(
             "flex h-7 items-center gap-1 rounded-[7px] px-2.5 text-[11px] transition-all duration-150",
             mode === "preview"
-              ? "bg-white text-[#1D1D1F] shadow-sm dark:bg-[#2C2C2E] dark:text-white"
-              : "text-[#86868B]"
+              ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              : "text-muted-foreground"
           )}
         >
           <Icon icon={EyeIcon} size={14} />
@@ -170,10 +171,11 @@ export function CanvasHeader() {
         <HeaderButton label="JSON schema" onClick={() => setSchemaOpen(true)}>
           <Icon icon={SourceCodeIcon} size={16} />
         </HeaderButton>
+        <ThemeToggle />
         <Button
           variant="outline"
           onClick={() => setShareOpen(true)}
-          className="ml-1 h-7 rounded-[7px] border-[#D2D2D7] bg-white px-2.5 text-[11px] dark:border-white/15 dark:bg-transparent"
+          className="ml-1 h-7 px-2.5 text-[11px]"
         >
           <Icon icon={Share01Icon} size={14} />
           Share

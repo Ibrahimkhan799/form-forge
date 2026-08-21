@@ -21,7 +21,7 @@ function FieldRow({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[12px] font-normal text-[#86868B]">{label}</Label>
+      <Label className="text-[11px] font-normal text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
@@ -102,10 +102,10 @@ export function InspectorPanel() {
 
   if (selectedFieldId === CONFIRMATION_ID && form) {
     return (
-      <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-        <div className="border-b border-[#E5E5EA] px-4 py-3 dark:border-white/10">
-          <p className="text-[11px] text-[#86868B]">Inspector</p>
-          <h2 className="mt-0.5 text-[14px] font-semibold text-[#1D1D1F] dark:text-white">
+      <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card">
+        <div className="border-b border-border/80 px-4 py-3">
+          <p className="text-[10px] text-muted-foreground">Inspector</p>
+          <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">
             Confirmation
           </h2>
         </div>
@@ -141,12 +141,12 @@ export function InspectorPanel() {
 
   if (!field) {
     return (
-      <aside className="min-h-0 w-72 shrink-0 overflow-hidden border-l border-[#E5E5EA] bg-white p-4 dark:border-white/10 dark:bg-[#1C1C1E]">
-        <p className="text-[13px] text-[#86868B]">Inspector</p>
-        <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
+      <aside className="min-h-0 w-72 shrink-0 overflow-hidden border-l border-border/80 bg-card p-4">
+        <p className="text-[10px] text-muted-foreground">Inspector</p>
+        <h2 className="mt-1 text-[13px] font-semibold text-foreground">
           No field selected
         </h2>
-        <p className="mt-2 text-[13px] leading-5 text-[#86868B]">
+        <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
           Click a question on the canvas to edit its label, validation, and options.
         </p>
       </aside>
@@ -160,10 +160,10 @@ export function InspectorPanel() {
   const hasRange = field.type === "number";
 
   return (
-    <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-      <div className="border-b border-[#E5E5EA] px-4 py-3 dark:border-white/10">
-        <p className="text-[11px] text-[#86868B]">Inspector</p>
-        <h2 className="mt-0.5 text-[14px] font-semibold text-[#1D1D1F] dark:text-white">
+    <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card">
+      <div className="border-b border-border/80 px-4 py-3">
+        <p className="text-[10px] text-muted-foreground">Inspector</p>
+        <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">
           {FIELD_TYPE_META[field.type].label}
         </h2>
       </div>

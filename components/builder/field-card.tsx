@@ -50,17 +50,17 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
       style={{ transform: CSS.Transform.toString(transform), transition }}
       onClick={() => selectField(field.id)}
       className={cn(
-        "group relative rounded-xl border bg-white p-3 will-change-transform dark:bg-[#1C1C1E]",
+        "group relative rounded-[10px] border bg-card p-3 will-change-transform",
         selected
           ? "border-[#007AFF]"
-          : "border-[#E5E5EA] transition-colors duration-150 hover:border-[#C7C7CC] dark:border-white/10",
+          : "border-border/90 transition-colors duration-150 hover:border-foreground/20",
         isDragging && "z-10 opacity-0"
       )}
     >
       <div className="mb-2 flex items-center gap-1.5">
         <button
           type="button"
-          className="grid size-6 touch-none cursor-grab place-items-center rounded-[7px] text-[#C7C7CC] hover:bg-[#F5F5F7] hover:text-[#86868B] active:cursor-grabbing"
+          className="grid size-6 touch-none cursor-grab place-items-center rounded-[6px] text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground active:cursor-grabbing"
           aria-label={`Reorder question ${index + 1}`}
           {...attributes}
           {...listeners}
@@ -73,7 +73,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
             if (value) changeFieldType(field.id, value as FormField["type"]);
           }}
         >
-          <SelectTrigger className="h-7 min-w-32 rounded-[8px] border-[#E5E5EA] text-[12px]">
+          <SelectTrigger className="h-7 min-w-32 text-[11px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +85,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
           </SelectContent>
         </Select>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-[12px] text-[#86868B]">Required</span>
+          <span className="text-[11px] text-muted-foreground">Required</span>
           <Switch
             checked={field.required}
             onCheckedChange={(checked) => updateField(field.id, { required: checked })}
@@ -96,7 +96,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 rounded-[8px] text-[#86868B]"
+                  className="size-7 text-muted-foreground"
                 />
               }
             >
@@ -126,7 +126,7 @@ export function FieldCard({ field, index }: { field: FormField; index: number })
         className="mb-2 h-8 border-transparent bg-transparent px-0 text-[15px] font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
       />
       {field.helpText ? (
-        <p className="mb-2 text-[12px] text-[#86868B]">{field.helpText}</p>
+        <p className="mb-2 text-[11px] text-muted-foreground">{field.helpText}</p>
       ) : null}
       <FieldPreview field={field} />
     </div>

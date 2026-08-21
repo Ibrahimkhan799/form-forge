@@ -39,7 +39,7 @@ export function SchemaDialog({
         if (next) setDraft(text);
       }}
     >
-      <DialogContent className="grid h-[min(720px,calc(100dvh-32px))] max-h-[calc(100dvh-32px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl p-5 sm:max-w-2xl">
+      <DialogContent className="grid h-[min(680px,calc(100dvh-24px))] max-h-[calc(100dvh-24px)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden p-4 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>JSON schema</DialogTitle>
           <DialogDescription>

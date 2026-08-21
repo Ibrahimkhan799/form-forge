@@ -21,18 +21,18 @@ function LibraryItem({ type }: { type: FieldType }) {
       type="button"
       onClick={() => addField(type)}
       className={cn(
-        "flex w-full touch-none items-center gap-2 rounded-[9px] px-2 py-1.5 text-left transition-colors duration-150 hover:bg-white dark:hover:bg-white/5",
+        "flex w-full touch-none items-center gap-2 rounded-[7px] px-2 py-1.5 text-left transition-colors duration-150 hover:bg-card",
         isDragging && "opacity-30"
       )}
       {...listeners}
       {...attributes}
     >
-      <span className="grid size-7 place-items-center rounded-[8px] bg-white text-[#007AFF] ring-1 ring-[#E5E5EA] dark:bg-white/10 dark:ring-white/10">
+      <span className="grid size-7 place-items-center rounded-[7px] bg-card text-[#007AFF] ring-1 ring-border/80">
         <Icon icon={meta.icon} size={14} />
       </span>
       <span>
-        <span className="block text-[12px] text-[#1D1D1F] dark:text-white">{meta.label}</span>
-        <span className="block text-[11px] text-[#86868B]">{meta.description}</span>
+        <span className="block text-[12px] text-foreground">{meta.label}</span>
+        <span className="block text-[11px] text-muted-foreground">{meta.description}</span>
       </span>
     </button>
   );
@@ -45,13 +45,13 @@ export function ComponentLibrary() {
   const setDisplayMode = useBuilderStore((state) => state.setDisplayMode);
 
   return (
-    <aside className="flex min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-[#E5E5EA] bg-[#FBFBFD] dark:border-white/10 dark:bg-[#161617]">
+    <aside className="flex min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r border-border/80 bg-[#F4F4F2] dark:bg-[#171717]">
       <div className="px-3 py-3">
-        <p className="text-[11px] font-medium text-[#86868B]">Fields</p>
-        <h2 className="mt-0.5 text-[14px] font-semibold text-[#1D1D1F] dark:text-white">
+        <p className="text-[11px] font-medium text-muted-foreground">Fields</p>
+        <h2 className="mt-0.5 text-[14px] font-semibold text-foreground">
           Component library
         </h2>
-        <div className="mt-3 grid grid-cols-2 rounded-[9px] bg-[#EEEEF0] p-0.5 dark:bg-white/8">
+        <div className="mt-3 grid grid-cols-2 rounded-[8px] bg-muted p-0.5">
           {(
             [
               ["conversational", "One at a time"],
@@ -65,8 +65,8 @@ export function ComponentLibrary() {
               className={cn(
                 "h-7 rounded-[7px] px-2 text-[11px] transition-colors",
                 form?.displayMode === value
-                  ? "bg-white text-[#1D1D1F] shadow-[0_1px_2px_rgba(0,0,0,0.08)] dark:bg-[#2C2C2E] dark:text-white"
-                  : "text-[#86868B]"
+                  ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                  : "text-muted-foreground"
               )}
             >
               {label}
@@ -77,7 +77,7 @@ export function ComponentLibrary() {
       <div className="flex-1 space-y-3 overflow-y-auto px-2 pb-3">
         {FIELD_GROUPS.map((group) => (
           <section key={group.id}>
-            <p className="mb-0.5 px-2 text-[11px] text-[#86868B]">{group.label}</p>
+            <p className="mb-0.5 px-2 text-[11px] text-muted-foreground">{group.label}</p>
             <div className="space-y-0.5">
               {FIELD_TYPES.filter((type) => FIELD_TYPE_META[type].group === group.id).map(
                 (type) => (
@@ -88,8 +88,8 @@ export function ComponentLibrary() {
           </section>
         ))}
       </div>
-      <div className="border-t border-[#E5E5EA] p-2 dark:border-white/10">
-        <p className="mb-2 px-1 text-[12px] text-[#86868B]">
+      <div className="border-t border-border/80 p-2">
+        <p className="mb-2 px-1 text-[11px] text-muted-foreground">
           Questions ({form?.fields.length ?? 0})
         </p>
         <div className="max-h-40 space-y-0.5 overflow-y-auto">
@@ -101,18 +101,18 @@ export function ComponentLibrary() {
               className={cn(
                 "flex w-full items-start gap-2 rounded-[9px] px-2 py-1.5 text-left transition-colors duration-150",
                 selectedFieldId === field.id
-                  ? "bg-white ring-1 ring-[#007AFF]/30 dark:bg-white/10"
-                  : "hover:bg-white/80 dark:hover:bg-white/5"
+                  ? "bg-card ring-1 ring-[#007AFF]/25"
+                  : "hover:bg-card/80"
               )}
             >
-              <span className="mt-0.5 grid size-5 place-items-center rounded-md bg-[#F5F5F7] text-[11px] text-[#86868B] dark:bg-white/10">
+              <span className="mt-0.5 grid size-5 place-items-center rounded-[5px] bg-muted text-[10px] text-muted-foreground">
                 {index + 1}
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-[13px] text-[#1D1D1F] dark:text-white">
+                <span className="block truncate text-[12px] text-foreground">
                   {field.label || "Untitled"}
                 </span>
-                <span className="block text-[12px] text-[#86868B]">
+                <span className="block text-[10px] text-muted-foreground">
                   {FIELD_TYPE_META[field.type].label}
                 </span>
               </span>
