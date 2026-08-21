@@ -22,7 +22,6 @@ import {
   type RightPanelView,
 } from "@/components/builder/right-panel-tabs";
 import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 const SWATCHES = [
@@ -168,7 +167,7 @@ export function AppearancePanel({
         </div>
       </div>
 
-      <ScrollArea className="h-0 min-h-0 flex-1">
+      <div className="editor-scrollbar h-0 min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
         <div className="space-y-5 px-4 pt-4 pr-8 pb-24">
           <Section title="Accent" description="Used for actions, focus, and selection.">
             <div className="flex flex-wrap items-center gap-2">
@@ -306,7 +305,7 @@ export function AppearancePanel({
             </div>
           </Section>
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="flex items-center justify-between border-t border-border/70 bg-card px-4 py-2.5">
         <p className="text-[10px] text-muted-foreground">Changes autosave</p>

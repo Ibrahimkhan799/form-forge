@@ -18,7 +18,6 @@ import {
   type RightPanelView,
 } from "@/components/builder/right-panel-tabs";
 import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 function FieldRow({
@@ -54,9 +53,9 @@ function PanelShell({
           <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">{title}</h2>
         </div>
       </div>
-      <ScrollArea className="h-0 min-h-0 flex-1">
-        <div className="space-y-4 px-4 pt-3 pr-8 pb-24">{children}</div>
-      </ScrollArea>
+      <div className="editor-scrollbar h-0 min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
+        <div className="space-y-4 px-4 pt-3 pr-8 pb-32">{children}</div>
+      </div>
     </aside>
   );
 }
