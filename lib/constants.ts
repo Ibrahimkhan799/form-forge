@@ -304,11 +304,10 @@ const LEGACY_FONT_NAMES: Record<string, string> = {
 function normalizeField(field: FormField): FormField {
   return {
     ...field,
-    componentStyle: {
+    componentStyle: field.componentStyle ?? {
       width: "full",
       alignment: "left",
       padding: 0,
-      ...(field.componentStyle ?? {}),
     },
   };
 }

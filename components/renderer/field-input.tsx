@@ -164,7 +164,7 @@ export function FieldInput({
             );
           case "image":
           case "richText":
-            return null;
+            return <></>;
         }
       }}
     />
