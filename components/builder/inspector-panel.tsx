@@ -45,15 +45,15 @@ function PanelShell({
   children: React.ReactNode;
 }) {
   return (
-    <aside className="flex h-full min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+    <aside className="grid h-full min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
       <div className="space-y-3 border-b border-border/80 px-3 py-3">
         <RightPanelTabs value="inspector" onChange={onViewChange} />
         <div>
-          <p className="text-[10px] text-muted-foreground">Inspector</p>
+          <p className="text-[10px] text-muted-foreground">INSPECTOR TEST</p>
           <h2 className="mt-0.5 text-[13px] font-semibold text-foreground">{title}</h2>
         </div>
       </div>
-      <div className="editor-scrollbar h-0 min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
+      <div className="editor-scrollbar min-h-0 overflow-x-hidden overflow-y-scroll">
         <div className="space-y-4 px-4 pt-3 pr-8 pb-32">{children}</div>
       </div>
     </aside>
