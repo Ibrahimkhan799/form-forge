@@ -73,7 +73,7 @@ export function ScrollArea({
       </div>
       <div
         className={cn(
-          "absolute top-0 right-0 bottom-0 z-10 w-3 border-l border-foreground/20 bg-foreground/10 shadow-[-1px_0_0_rgba(255,255,255,0.03)]",
+          "absolute top-0 right-0 bottom-0 z-20 w-[14px] border-l border-[#C8C8C4] bg-[#E8E8E5] shadow-[-1px_0_2px_rgba(0,0,0,0.08)] dark:border-[#424242] dark:bg-[#111111]",
           !metrics.scrollable && "opacity-45"
         )}
         aria-hidden
@@ -94,7 +94,7 @@ export function ScrollArea({
             event.currentTarget.releasePointerCapture(event.pointerId);
           }}
           className={cn(
-            "absolute inset-x-[2px] rounded-full bg-foreground/70 shadow-sm ring-1 ring-background/40 transition-colors hover:bg-foreground/90",
+            "absolute inset-x-[3px] rounded-full bg-[#5F6368] shadow-sm ring-1 ring-black/15 transition-colors hover:bg-[#34373B] dark:bg-[#F2F2F2] dark:ring-white/20 dark:hover:bg-white",
             metrics.scrollable ? "cursor-grab active:cursor-grabbing" : "cursor-default"
           )}
           style={{
