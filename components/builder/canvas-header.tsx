@@ -1,0 +1,196 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import {
+  ArrowLeft01Icon,
+  CloudSavingDone01Icon,
+  EyeIcon,
+  FloppyDiskIcon,
+  HistoryIcon,
+  Loading03Icon,
+  PaletteIcon,
+  PencilEdit01Icon,
+  PlayIcon,
+  Redo02Icon,
+  Share01Icon,
+  SourceCodeIcon,
+  Undo02Icon,
+} from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Icon } from "@/components/icon";
+import { ThemeCustomizer } from "@/components/builder/theme-customizer";
+import { VersionHistory } from "@/components/builder/version-history";
+import { ShareDialog } from "@/components/builder/share-dialog";
+import { SchemaDialog } from "@/components/builder/schema-dialog";
+import { useBuilderStore, useBuilderTemporal } from "@/lib/store/builder-store";
+import { relativeTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
+
+function HeaderButton({
+  label,
+  shortcut,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  shortcut?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={disabled}
+            onClick={onClick}
+            className="size-8 rounded-[8px] text-[#1D1D1F] hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
+          />
+        }
+      >
+        {children}
+      </TooltipTrigger>
+      <TooltipContent>
+        {label}
+        {shortcut ? <span className="ml-2 text-white/60">{shortcut}</span> : null}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+export function CanvasHeader() {
+  const form = useBuilderStore((state) => state.form);
+  const mode = useBuilderStore((state) => state.mode);
+  const saveStatus = useBuilderStore((state) => state.saveStatus);
+  const setTitle = useBuilderStore((state) => state.setTitle);
+  const setMode = useBuilderStore((state) => state.setMode);
+  const canUndo = useBuilderTemporal((state) => state.pastStates.length > 0);
+  const canRedo = useBuilderTemporal((state) => state.futureStates.length > 0);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [schemaOpen, setSchemaOpen] = useState(false);
+
+  if (!form) return null;
+
+  return (
+    <header className="flex h-14 items-center justify-between gap-4 border-b border-[#E5E5EA] bg-white px-4 dark:border-white/10 dark:bg-[#1C1C1E]">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <Link
+          href="/"
+          className="grid size-8 place-items-center rounded-[8px] text-[#1D1D1F] transition-colors duration-150 hover:bg-black/5 dark:text-white dark:hover:bg-white/10"
+          aria-label="Back to dashboard"
+        >
+          <Icon icon={ArrowLeft01Icon} size={18} />
+        </Link>
+        <div className="min-w-0">
+          <Input
+            value={form.title}
+            onChange={(event) => setTitle(event.target.value)}
+            className="h-8 border-transparent bg-transparent px-1 text-[15px] font-semibold shadow-none focus-visible:border-[#007AFF] focus-visible:ring-[#007AFF]/20"
+          />
+          <div className="flex items-center gap-1.5 px-1 text-[12px] text-[#86868B]">
+            {saveStatus === "saving" ? (
+              <Icon icon={Loading03Icon} size={12} className="animate-spin" />
+            ) : saveStatus === "unsaved" ? (
+              <Icon icon={FloppyDiskIcon} size={12} />
+            ) : (
+              <Icon icon={CloudSavingDone01Icon} size={12} />
+            )}
+            <span>
+              {saveStatus === "saving"
+                ? "Saving..."
+                : saveStatus === "unsaved"
+                  ? "Edited just now"
+                  : `Saved ${relativeTime(form.updatedAt)}`}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 rounded-xl bg-[#F5F5F7] p-1 dark:bg-white/10">
+        <button
+          type="button"
+          onClick={() => setMode("edit")}
+          className={cn(
+            "flex h-7 items-center gap-1.5 rounded-[8px] px-3 text-[13px] transition-all duration-150",
+            mode === "edit"
+              ? "bg-white text-[#1D1D1F] shadow-sm dark:bg-[#2C2C2E] dark:text-white"
+              : "text-[#86868B]"
+          )}
+        >
+          <Icon icon={PencilEdit01Icon} size={14} />
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("preview")}
+          className={cn(
+            "flex h-7 items-center gap-1.5 rounded-[8px] px-3 text-[13px] transition-all duration-150",
+            mode === "preview"
+              ? "bg-white text-[#1D1D1F] shadow-sm dark:bg-[#2C2C2E] dark:text-white"
+              : "text-[#86868B]"
+          )}
+        >
+          <Icon icon={EyeIcon} size={14} />
+          Live preview
+        </button>
+      </div>
+
+      <div className="flex flex-1 items-center justify-end gap-1">
+        <HeaderButton
+          label="Undo"
+          shortcut="⌘Z"
+          disabled={!canUndo}
+          onClick={() => useBuilderStore.temporal.getState().undo()}
+        >
+          <Icon icon={Undo02Icon} size={16} />
+        </HeaderButton>
+        <HeaderButton
+          label="Redo"
+          shortcut="⇧⌘Z"
+          disabled={!canRedo}
+          onClick={() => useBuilderStore.temporal.getState().redo()}
+        >
+          <Icon icon={Redo02Icon} size={16} />
+        </HeaderButton>
+        <HeaderButton label="Theme" onClick={() => setThemeOpen(true)}>
+          <Icon icon={PaletteIcon} size={16} />
+        </HeaderButton>
+        <HeaderButton label="Version history" onClick={() => setHistoryOpen(true)}>
+          <Icon icon={HistoryIcon} size={16} />
+        </HeaderButton>
+        <HeaderButton label="JSON schema" onClick={() => setSchemaOpen(true)}>
+          <Icon icon={SourceCodeIcon} size={16} />
+        </HeaderButton>
+        <Button
+          variant="outline"
+          onClick={() => setShareOpen(true)}
+          className="ml-1 h-8 rounded-[8px] border-[#D2D2D7] bg-white px-3 text-[13px] dark:border-white/15 dark:bg-transparent"
+        >
+          <Icon icon={Share01Icon} size={14} />
+          Share
+        </Button>
+        <Button
+          onClick={() => setShareOpen(true)}
+          className="h-8 rounded-[8px] bg-[#007AFF] px-3 text-[13px] text-white hover:bg-[#0071E3]"
+        >
+          <Icon icon={PlayIcon} size={14} />
+          Publish
+        </Button>
+      </div>
+
+      <ThemeCustomizer open={themeOpen} onOpenChange={setThemeOpen} />
+      <VersionHistory open={historyOpen} onOpenChange={setHistoryOpen} />
+      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} />
+      <SchemaDialog open={schemaOpen} onOpenChange={setSchemaOpen} />
+    </header>
+  );
+}
