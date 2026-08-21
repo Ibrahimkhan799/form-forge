@@ -5,6 +5,7 @@ import {
   AppleCheckbox,
   AppleRadio,
   AppleSelect,
+  DatePicker,
   FileDropzone,
   StarRating,
 } from "@/components/fields/controls";
@@ -17,15 +18,16 @@ export function FieldPreview({ field }: { field: FormField }) {
     case "email":
     case "phone":
     case "number":
-    case "date":
       return (
         <input
           disabled
-          type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+          type={field.type === "number" ? "number" : "text"}
           placeholder={field.placeholder || "Answer"}
           className="ff-input pointer-events-none"
         />
       );
+    case "date":
+      return <DatePicker disabled placeholder={field.placeholder || "Pick a date"} />;
     case "dropdown":
       return (
         <AppleSelect

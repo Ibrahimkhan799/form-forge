@@ -11,10 +11,18 @@ import {
   StarIcon,
   TextIcon,
 } from "@hugeicons/core-free-icons";
-import type { FieldType, FormDocument, FormField, FormTheme, FormVersion } from "@/lib/types";
+import type {
+  FieldType,
+  FormConfirmation,
+  FormDocument,
+  FormField,
+  FormTheme,
+  FormVersion,
+} from "@/lib/types";
 import { createId } from "@/lib/id";
 
 export const APP_NAME = "FormForge";
+export const CONFIRMATION_ID = "__confirmation__";
 
 export const DEFAULT_THEME: FormTheme = {
   primaryColor: "#007AFF",
@@ -23,6 +31,12 @@ export const DEFAULT_THEME: FormTheme = {
   fontFamily: "sf-pro",
   backgroundColor: "#FFFFFF",
   textColor: "#1D1D1F",
+};
+
+export const DEFAULT_CONFIRMATION: FormConfirmation = {
+  title: "Thank you",
+  message: "Your response has been recorded.",
+  buttonLabel: "Submit another response",
 };
 
 export const FONT_STACKS: Record<FormTheme["fontFamily"], string> = {
@@ -193,6 +207,8 @@ export function createBlankForm(title = "Untitled form"): FormDocument {
     description: "",
     fields: [createField("text")],
     theme: { ...DEFAULT_THEME },
+    displayMode: "conversational",
+    confirmation: { ...DEFAULT_CONFIRMATION },
     published: false,
     createdAt: now,
     updatedAt: now,
@@ -206,7 +222,31 @@ export function cloneSnapshot(form: FormDocument): FormVersion["snapshot"] {
     description: form.description,
     fields: form.fields,
     theme: form.theme,
+    displayMode: form.displayMode,
+    confirmation: form.confirmation,
   });
+}
+
+export function normalizeFormDocument(form: FormDocument): FormDocument {
+  return {
+    ...form,
+    displayMode: form.displayMode ?? "conversational",
+    confirmation: {
+      ...DEFAULT_CONFIRMATION,
+      ...(form.confirmation ?? {}),
+    },
+    versions: (form.versions ?? []).map((version) => ({
+      ...version,
+      snapshot: {
+        ...version.snapshot,
+        displayMode: version.snapshot.displayMode ?? form.displayMode ?? "conversational",
+        confirmation: {
+          ...DEFAULT_CONFIRMATION,
+          ...(version.snapshot.confirmation ?? form.confirmation ?? {}),
+        },
+      },
+    })),
+  };
 }
 
 export const DEMO_FORM_ID = "welcome";
@@ -259,6 +299,8 @@ export function createDemoForm(): FormDocument {
     description: "A two-minute pulse check to help us shape FormForge.",
     fields: [name, email, role, tools, rating, date],
     theme: { ...DEFAULT_THEME },
+    displayMode: "conversational",
+    confirmation: { ...DEFAULT_CONFIRMATION },
     published: true,
     createdAt: now,
     updatedAt: now,
@@ -272,6 +314,8 @@ export function createDemoForm(): FormDocument {
           description: "A two-minute pulse check to help us shape FormForge.",
           fields: [name, email, role, tools, rating, date],
           theme: { ...DEFAULT_THEME },
+          displayMode: "conversational",
+          confirmation: { ...DEFAULT_CONFIRMATION },
         },
       },
     ],

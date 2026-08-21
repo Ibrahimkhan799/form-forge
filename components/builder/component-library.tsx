@@ -1,7 +1,6 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { FIELD_GROUPS, FIELD_TYPE_META } from "@/lib/constants";
 import { FIELD_TYPES, type FieldType } from "@/lib/types";
 import { Icon } from "@/components/icon";
@@ -11,7 +10,7 @@ import { cn } from "@/lib/utils";
 function LibraryItem({ type }: { type: FieldType }) {
   const addField = useBuilderStore((state) => state.addField);
   const meta = FIELD_TYPE_META[type];
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `library:${type}`,
     data: { fromLibrary: true, type },
   });
@@ -21,10 +20,9 @@ function LibraryItem({ type }: { type: FieldType }) {
       ref={setNodeRef}
       type="button"
       onClick={() => addField(type)}
-      style={{ transform: CSS.Translate.toString(transform) }}
       className={cn(
-        "flex w-full items-center gap-3 rounded-xl border border-transparent px-2 py-2 text-left transition-all duration-150 hover:border-[#E5E5EA] hover:bg-white dark:hover:border-white/10 dark:hover:bg-white/5",
-        isDragging && "opacity-40"
+        "flex w-full touch-none items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors duration-150 hover:bg-white dark:hover:bg-white/5",
+        isDragging && "opacity-30"
       )}
       {...listeners}
       {...attributes}
@@ -44,14 +42,37 @@ export function ComponentLibrary() {
   const form = useBuilderStore((state) => state.form);
   const selectedFieldId = useBuilderStore((state) => state.selectedFieldId);
   const selectField = useBuilderStore((state) => state.selectField);
+  const setDisplayMode = useBuilderStore((state) => state.setDisplayMode);
 
   return (
-    <aside className="flex w-72 shrink-0 flex-col border-r border-[#E5E5EA] bg-[#FBFBFD] dark:border-white/10 dark:bg-[#161617]">
+    <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-hidden border-r border-[#E5E5EA] bg-[#FBFBFD] dark:border-white/10 dark:bg-[#161617]">
       <div className="px-4 py-4">
         <p className="text-[13px] font-medium text-[#86868B]">Fields</p>
         <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
           Component library
         </h2>
+        <div className="mt-4 grid grid-cols-2 rounded-[10px] bg-[#EEEEF0] p-1 dark:bg-white/8">
+          {(
+            [
+              ["conversational", "One at a time"],
+              ["classic", "All at once"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setDisplayMode(value)}
+              className={cn(
+                "h-7 rounded-[7px] px-2 text-[12px] transition-colors",
+                form?.displayMode === value
+                  ? "bg-white text-[#1D1D1F] shadow-[0_1px_2px_rgba(0,0,0,0.08)] dark:bg-[#2C2C2E] dark:text-white"
+                  : "text-[#86868B]"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
         {FIELD_GROUPS.map((group) => (

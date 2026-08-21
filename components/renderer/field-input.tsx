@@ -7,6 +7,7 @@ import {
   AppleCheckbox,
   AppleRadio,
   AppleSelect,
+  DatePicker,
   FileDropzone,
   StarRating,
 } from "@/components/fields/controls";
@@ -56,7 +57,6 @@ export function FieldInput({
           case "email":
           case "phone":
           case "number":
-          case "date":
             return (
               <div>
                 <input
@@ -65,9 +65,7 @@ export function FieldInput({
                   type={
                     field.type === "number"
                       ? "number"
-                      : field.type === "date"
-                        ? "date"
-                        : field.type === "email"
+                      : field.type === "email"
                           ? "email"
                           : field.type === "phone"
                             ? "tel"
@@ -78,6 +76,17 @@ export function FieldInput({
                   onChange={rhf.onChange}
                   onBlur={rhf.onBlur}
                   className="ff-input"
+                />
+                <FieldError message={fieldState.error?.message} />
+              </div>
+            );
+          case "date":
+            return (
+              <div>
+                <DatePicker
+                  value={(rhf.value as string) ?? ""}
+                  placeholder={field.placeholder || "Pick a date"}
+                  onChange={rhf.onChange}
                 />
                 <FieldError message={fieldState.error?.message} />
               </div>

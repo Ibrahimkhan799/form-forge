@@ -1,7 +1,7 @@
 "use client";
 
 import { Delete02Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
-import { FIELD_TYPE_META } from "@/lib/constants";
+import { CONFIRMATION_ID, FIELD_TYPE_META } from "@/lib/constants";
 import { createId } from "@/lib/id";
 import type { FormField } from "@/lib/types";
 import { Icon } from "@/components/icon";
@@ -95,11 +95,53 @@ function OptionsEditor({ field }: { field: FormField }) {
 
 export function InspectorPanel() {
   const field = useSelectedField();
+  const form = useBuilderStore((state) => state.form);
+  const selectedFieldId = useBuilderStore((state) => state.selectedFieldId);
   const updateField = useBuilderStore((state) => state.updateField);
+  const updateConfirmation = useBuilderStore((state) => state.updateConfirmation);
+
+  if (selectedFieldId === CONFIRMATION_ID && form) {
+    return (
+      <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
+        <div className="border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
+          <p className="text-[13px] text-[#86868B]">Inspector</p>
+          <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
+            Confirmation
+          </h2>
+        </div>
+        <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-4">
+          <FieldRow label="Title">
+            <Input
+              value={form.confirmation.title}
+              onChange={(event) => updateConfirmation({ title: event.target.value })}
+              className="h-9 rounded-xl px-4 text-[13px]"
+            />
+          </FieldRow>
+          <FieldRow label="Message">
+            <Textarea
+              value={form.confirmation.message}
+              onChange={(event) => updateConfirmation({ message: event.target.value })}
+              className="min-h-24 rounded-xl px-4 text-[13px]"
+            />
+          </FieldRow>
+          <FieldRow label="Restart button">
+            <Input
+              value={form.confirmation.buttonLabel}
+              onChange={(event) => updateConfirmation({ buttonLabel: event.target.value })}
+              className="h-9 rounded-xl px-4 text-[13px]"
+            />
+          </FieldRow>
+          <p className="text-[12px] leading-5 text-[#86868B]">
+            The restart button is shown in preview and after a successful public submission.
+          </p>
+        </div>
+      </aside>
+    );
+  }
 
   if (!field) {
     return (
-      <aside className="w-80 shrink-0 border-l border-[#E5E5EA] bg-white p-5 dark:border-white/10 dark:bg-[#1C1C1E]">
+      <aside className="min-h-0 w-80 shrink-0 overflow-hidden border-l border-[#E5E5EA] bg-white p-5 dark:border-white/10 dark:bg-[#1C1C1E]">
         <p className="text-[13px] text-[#86868B]">Inspector</p>
         <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
           No field selected
@@ -118,14 +160,14 @@ export function InspectorPanel() {
   const hasRange = field.type === "number";
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
+    <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
       <div className="border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
         <p className="text-[13px] text-[#86868B]">Inspector</p>
         <h2 className="mt-1 text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
           {FIELD_TYPE_META[field.type].label}
         </h2>
       </div>
-      <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+      <div className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-4">
         <FieldRow label="Label">
           <Input
             value={field.label}

@@ -27,6 +27,8 @@ export interface FormJsonSchema {
   required?: string[];
   "x-formforge"?: {
     theme?: FormDocument["theme"];
+    displayMode?: FormDocument["displayMode"];
+    confirmation?: FormDocument["confirmation"];
     fieldMeta?: Record<string, Partial<FormField>>;
   };
 }
@@ -113,6 +115,8 @@ export function formToJsonSchema(form: FormDocument): FormJsonSchema {
     required,
     "x-formforge": {
       theme: form.theme,
+      displayMode: form.displayMode,
+      confirmation: form.confirmation,
       fieldMeta,
     },
   };

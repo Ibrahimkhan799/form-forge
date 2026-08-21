@@ -63,6 +63,14 @@ export interface FormTheme {
   textColor: string;
 }
 
+export type FormDisplayMode = "conversational" | "classic";
+
+export interface FormConfirmation {
+  title: string;
+  message: string;
+  buttonLabel: string;
+}
+
 export interface FormVersion {
   id: string;
   createdAt: string;
@@ -72,6 +80,8 @@ export interface FormVersion {
     description: string;
     fields: FormField[];
     theme: FormTheme;
+    displayMode: FormDisplayMode;
+    confirmation: FormConfirmation;
   };
 }
 
@@ -81,6 +91,8 @@ export interface FormDocument {
   description: string;
   fields: FormField[];
   theme: FormTheme;
+  displayMode: FormDisplayMode;
+  confirmation: FormConfirmation;
   published: boolean;
   createdAt: string;
   updatedAt: string;

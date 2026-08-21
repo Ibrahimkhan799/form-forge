@@ -33,7 +33,7 @@ export function BuilderShell({ formId }: { formId: string }) {
   const persisted = useFormsStore((state) =>
     state.forms.find((item) => item.id === formId)
   );
-  const [activeType, setActiveType] = useState<FieldType | null>(null);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   useAutosave();
   useBuilderShortcuts();
@@ -51,13 +51,11 @@ export function BuilderShell({ formId }: { formId: string }) {
 
   function handleDragStart(event: DragStartEvent) {
     const id = String(event.active.id);
-    if (id.startsWith("library:")) {
-      setActiveType(id.replace("library:", "") as FieldType);
-    }
+    setActiveDragId(id);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveType(null);
+    setActiveDragId(null);
     const { active, over } = event;
     if (!over || !form) return;
 
@@ -102,9 +100,9 @@ export function BuilderShell({ formId }: { formId: string }) {
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveType(null)}
+      onDragCancel={() => setActiveDragId(null)}
     >
-      <div className="flex h-screen flex-col overflow-hidden bg-[#FBFBFD] dark:bg-black">
+      <div className="fixed inset-0 flex h-dvh w-screen flex-col overflow-hidden bg-[#FBFBFD] dark:bg-black">
         <CanvasHeader />
         <AnimatePresence mode="wait">
           {mode === "preview" ? (
@@ -125,7 +123,7 @@ export function BuilderShell({ formId }: { formId: string }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.18, ease: "easeInOut" }}
-              className="flex min-h-0 flex-1"
+              className="flex min-h-0 flex-1 overflow-hidden"
             >
               <ComponentLibrary />
               <FormCanvas />
@@ -134,18 +132,42 @@ export function BuilderShell({ formId }: { formId: string }) {
           )}
         </AnimatePresence>
       </div>
-      <DragOverlay>
-        {activeType ? (
-          <div className="flex items-center gap-3 rounded-xl border border-[#E5E5EA] bg-white px-3 py-2 shadow-sm">
-            <span className="grid size-8 place-items-center rounded-[10px] bg-[#F5F5F7] text-[#007AFF]">
-              <Icon icon={FIELD_TYPE_META[activeType].icon} size={16} />
-            </span>
-            <span className="text-[13px] text-[#1D1D1F]">
-              {FIELD_TYPE_META[activeType].label}
-            </span>
-          </div>
+      <DragOverlay dropAnimation={null} zIndex={100}>
+        {activeDragId ? (
+          <DragPreview
+            type={
+              activeDragId.startsWith("library:")
+                ? (activeDragId.replace("library:", "") as FieldType)
+                : form.fields.find((field) => field.id === activeDragId)?.type
+            }
+            label={
+              activeDragId.startsWith("library:")
+                ? undefined
+                : form.fields.find((field) => field.id === activeDragId)?.label
+            }
+          />
         ) : null}
       </DragOverlay>
     </DndContext>
+  );
+}
+
+function DragPreview({ type, label }: { type?: FieldType; label?: string }) {
+  if (!type) return null;
+
+  return (
+    <div className="flex w-72 rotate-[1deg] items-center gap-3 rounded-xl border border-[#007AFF]/40 bg-white px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.16)]">
+      <span className="grid size-8 place-items-center rounded-[9px] bg-[#F5F5F7] text-[#007AFF]">
+        <Icon icon={FIELD_TYPE_META[type].icon} size={16} />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-[13px] font-medium text-[#1D1D1F]">
+          {label || FIELD_TYPE_META[type].label}
+        </span>
+        <span className="block text-[12px] text-[#86868B]">
+          {FIELD_TYPE_META[type].description}
+        </span>
+      </span>
+    </div>
   );
 }

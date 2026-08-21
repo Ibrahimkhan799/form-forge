@@ -21,29 +21,60 @@ export function FormPlayer({
   form: FormDocument;
   preview?: boolean;
 }) {
-  const schema = useMemo(() => buildZodSchema(form.fields), [form.fields]);
-  const methods = useForm<Record<string, unknown>>({
-    resolver: zodResolver(schema),
-    defaultValues: buildDefaultValues(form.fields) as Record<string, unknown>,
-    mode: "onSubmit",
-  });
   const recordVisit = useSubmissionsStore((state) => state.recordVisit);
-  const addSubmission = useSubmissionsStore((state) => state.addSubmission);
-  const [step, setStep] = useState(-1);
-  const [direction, setDirection] = useState(1);
 
   useEffect(() => {
     if (!preview) recordVisit(form.id);
   }, [form.id, preview, recordVisit]);
 
+  return form.displayMode === "classic" ? (
+    <ClassicForm form={form} preview={preview} />
+  ) : (
+    <ConversationalForm form={form} preview={preview} />
+  );
+}
+
+function useDynamicForm(form: FormDocument) {
+  const schema = useMemo(() => buildZodSchema(form.fields), [form.fields]);
+  return useForm<Record<string, unknown>>({
+    resolver: zodResolver(schema),
+    defaultValues: buildDefaultValues(form.fields) as Record<string, unknown>,
+    mode: "onSubmit",
+  });
+}
+
+function formSurfaceStyle(form: FormDocument) {
+  const background =
+    form.theme.backgroundStyle === "gradient"
+      ? `radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, ${form.theme.primaryColor} 18%, white), ${form.theme.backgroundColor})`
+      : form.theme.backgroundColor;
+
+  return {
+    ...themeToStyle(form.theme),
+    background,
+    color: form.theme.textColor,
+    fontFamily: FONT_STACKS[form.theme.fontFamily],
+  };
+}
+
+function ConversationalForm({
+  form,
+  preview,
+}: {
+  form: FormDocument;
+  preview: boolean;
+}) {
+  const methods = useDynamicForm(form);
+  const addSubmission = useSubmissionsStore((state) => state.addSubmission);
+  const [step, setStep] = useState(-1);
+  const [direction, setDirection] = useState(1);
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Enter" || event.shiftKey) return;
-      if (step === -1) {
-        event.preventDefault();
-        setDirection(1);
-        setStep(0);
-      }
+      if (event.key !== "Enter" || event.shiftKey || step !== -1) return;
+      event.preventDefault();
+      setDirection(1);
+      setStep(0);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -52,7 +83,12 @@ export function FormPlayer({
   const field = step >= 0 && step < form.fields.length ? form.fields[step] : null;
   const isWelcome = step === -1;
   const isThanks = step >= form.fields.length;
-  const progress = isWelcome || isThanks ? (isThanks ? 100 : 0) : ((step + 1) / form.fields.length) * 100;
+  const progress =
+    isWelcome || isThanks
+      ? isThanks
+        ? 100
+        : 0
+      : ((step + 1) / form.fields.length) * 100;
 
   async function goNext() {
     if (field) {
@@ -66,46 +102,35 @@ export function FormPlayer({
     }
   }
 
-  function goBack() {
-    if (step < 0) return;
+  function restart() {
+    methods.reset(buildDefaultValues(form.fields) as Record<string, unknown>);
     setDirection(-1);
-    setStep((current) => Math.max(-1, current - 1));
+    setStep(-1);
   }
-
-  const background =
-    form.theme.backgroundStyle === "gradient"
-      ? `radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, ${form.theme.primaryColor} 18%, white), ${form.theme.backgroundColor})`
-      : form.theme.backgroundColor;
 
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 flex-col",
-        form.theme.backgroundStyle === "dots" && "canvas-dots"
+        "form-surface relative flex h-full min-h-0 flex-col overflow-hidden",
+        form.theme.backgroundStyle === "dots" && "form-dots"
       )}
-      style={{
-        ...themeToStyle(form.theme),
-        background,
-        color: form.theme.textColor,
-        fontFamily: FONT_STACKS[form.theme.fontFamily],
-      }}
+      style={formSurfaceStyle(form)}
     >
-      <div className="h-1 bg-black/5">
+      <div className="h-1 shrink-0 bg-black/5">
         <div
           className="h-full transition-all duration-200 ease-in-out"
           style={{ width: `${progress}%`, background: form.theme.primaryColor }}
         />
       </div>
-
-      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-6 py-10">
+      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center overflow-y-auto px-8 py-10">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={isWelcome ? "welcome" : isThanks ? "thanks" : field?.id}
             custom={direction}
-            initial={{ opacity: 0, y: direction > 0 ? 16 : -16 }}
+            initial={{ opacity: 0, y: direction > 0 ? 14 : -14 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: direction > 0 ? -16 : 16 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            exit={{ opacity: 0, y: direction > 0 ? -14 : 14 }}
+            transition={{ duration: 0.18, ease: "easeInOut" }}
           >
             {isWelcome ? (
               <div>
@@ -118,16 +143,11 @@ export function FormPlayer({
                     {form.description}
                   </p>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="mt-8 inline-flex h-11 items-center gap-2 rounded-[8px] px-5 text-[15px] text-white transition-opacity duration-150 hover:opacity-90"
-                  style={{ background: form.theme.primaryColor }}
-                >
+                <PrimaryButton color={form.theme.primaryColor} onClick={goNext} className="mt-8">
                   Start
                   <Icon icon={ArrowRight01Icon} size={16} />
-                </button>
-                <p className="mt-3 text-[13px] text-[#86868B]">press Enter ↵</p>
+                </PrimaryButton>
+                <p className="mt-3 text-[12px] text-[#86868B]">Press Enter ↵</p>
               </div>
             ) : null}
 
@@ -150,60 +170,161 @@ export function FormPlayer({
                   />
                 </div>
                 <div className="mt-6 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    className="inline-flex h-11 items-center gap-2 rounded-[8px] px-5 text-[15px] text-white transition-opacity duration-150 hover:opacity-90"
-                    style={{ background: form.theme.primaryColor }}
-                  >
+                  <PrimaryButton color={form.theme.primaryColor} onClick={goNext}>
                     {step === form.fields.length - 1 ? "Submit" : "OK"}
                     <Icon icon={Tick02Icon} size={16} />
+                  </PrimaryButton>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDirection(-1);
+                      setStep((current) => Math.max(-1, current - 1));
+                    }}
+                    className="h-11 rounded-[8px] px-3 text-[13px] text-[#86868B] hover:text-[#1D1D1F]"
+                  >
+                    Back
                   </button>
-                  {step > 0 || !isWelcome ? (
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      className="h-11 rounded-[8px] px-3 text-[13px] text-[#86868B] transition-colors duration-150 hover:text-[#1D1D1F]"
-                    >
-                      Back
-                    </button>
-                  ) : null}
                 </div>
-                <p className="mt-3 text-[13px] text-[#86868B]">press Enter ↵</p>
+                <p className="mt-3 text-[12px] text-[#86868B]">Press Enter ↵</p>
               </div>
             ) : null}
 
             {isThanks ? (
-              <div>
-                <div
-                  className="mb-5 grid size-12 place-items-center rounded-full text-white"
-                  style={{ background: form.theme.primaryColor }}
-                >
-                  <Icon icon={Tick02Icon} size={22} />
-                </div>
-                <h2 className="text-4xl font-semibold tracking-tight">Thank you</h2>
-                <p className="mt-3 text-[15px] text-[#86868B]">
-                  {preview
-                    ? "This is the confirmation screen respondents will see."
-                    : "Your response has been recorded."}
-                </p>
-                {preview ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      methods.reset(buildDefaultValues(form.fields) as Record<string, unknown>);
-                      setStep(-1);
-                    }}
-                    className="mt-8 text-[13px] text-[#007AFF]"
-                  >
-                    Restart preview
-                  </button>
-                ) : null}
-              </div>
+              <ConfirmationView form={form} onRestart={restart} />
             ) : null}
           </motion.div>
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+function ClassicForm({
+  form,
+  preview,
+}: {
+  form: FormDocument;
+  preview: boolean;
+}) {
+  const methods = useDynamicForm(form);
+  const addSubmission = useSubmissionsStore((state) => state.addSubmission);
+  const [submitted, setSubmitted] = useState(false);
+
+  const submit = methods.handleSubmit((values) => {
+    if (!preview) addSubmission(form.id, values);
+    setSubmitted(true);
+  });
+
+  function restart() {
+    methods.reset(buildDefaultValues(form.fields) as Record<string, unknown>);
+    setSubmitted(false);
+  }
+
+  return (
+    <div
+      className={cn(
+        "form-surface h-full overflow-y-auto overscroll-contain",
+        form.theme.backgroundStyle === "dots" && "form-dots"
+      )}
+      style={formSurfaceStyle(form)}
+    >
+      <div className="mx-auto w-full max-w-2xl px-6 py-10 sm:py-14">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          className="rounded-[calc(var(--ff-radius)+4px)] border border-black/8 bg-white p-6 sm:p-8"
+        >
+          {submitted ? (
+            <ConfirmationView form={form} onRestart={restart} />
+          ) : (
+            <form onSubmit={submit}>
+              <p className="text-[12px] text-[#86868B]">FormForge form</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight">{form.title}</h1>
+              {form.description ? (
+                <p className="mt-2 text-[15px] leading-6 text-[#86868B]">{form.description}</p>
+              ) : null}
+              <div className="mt-8 space-y-7">
+                {form.fields.map((field) => (
+                  <div key={field.id}>
+                    <label className="mb-2 block text-[15px] font-medium">
+                      {field.label}
+                      {field.required ? (
+                        <span className="ml-1 text-[var(--ff-primary)]">*</span>
+                      ) : null}
+                    </label>
+                    {field.helpText ? (
+                      <p className="mb-3 text-[13px] text-[#86868B]">{field.helpText}</p>
+                    ) : null}
+                    <FieldInput field={field} control={methods.control} />
+                  </div>
+                ))}
+              </div>
+              <PrimaryButton
+                color={form.theme.primaryColor}
+                type="submit"
+                className="mt-8"
+              >
+                Submit
+                <Icon icon={ArrowRight01Icon} size={16} />
+              </PrimaryButton>
+            </form>
+          )}
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmationView({
+  form,
+  onRestart,
+}: {
+  form: FormDocument;
+  onRestart: () => void;
+}) {
+  return (
+    <div>
+      <div
+        className="mb-5 grid size-12 place-items-center rounded-full text-white"
+        style={{ background: form.theme.primaryColor }}
+      >
+        <Icon icon={Tick02Icon} size={22} />
+      </div>
+      <h2 className="text-4xl font-semibold tracking-tight">{form.confirmation.title}</h2>
+      <p className="mt-3 text-[15px] leading-6 text-[#86868B]">
+        {form.confirmation.message}
+      </p>
+      <button
+        type="button"
+        onClick={onRestart}
+        className="mt-7 text-[13px] font-medium text-[var(--ff-primary)]"
+      >
+        {form.confirmation.buttonLabel}
+      </button>
+    </div>
+  );
+}
+
+function PrimaryButton({
+  color,
+  className,
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  color: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "inline-flex h-11 items-center gap-2 rounded-[8px] px-5 text-[15px] text-white transition-opacity duration-150 hover:opacity-90",
+        className
+      )}
+      style={{ background: color }}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }
