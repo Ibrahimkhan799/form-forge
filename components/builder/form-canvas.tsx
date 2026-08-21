@@ -28,8 +28,8 @@ export function FormCanvas() {
       className="builder-canvas canvas-dots h-full min-h-0 flex-1 overflow-y-auto overscroll-contain"
     >
       <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col gap-3 px-4 py-4 pb-8">
-        <div className="rounded-xl border border-[#E5E5EA] bg-white p-4 dark:border-white/10 dark:bg-[#1C1C1E]">
-          <p className="text-[12px] text-[#86868B]">Form description</p>
+        <div className="rounded-[10px] border border-border/90 bg-card p-4">
+          <p className="text-[11px] text-muted-foreground">Form description</p>
           <Textarea
             value={form.description}
             onChange={(event) => setDescription(event.target.value)}
@@ -54,11 +54,11 @@ export function FormCanvas() {
             className={`flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition-colors duration-150 ${
               isOver
                 ? "border-[#007AFF] bg-[rgba(0,122,255,0.06)]"
-                : "border-[#D2D2D7] bg-white/70 dark:bg-white/5"
+                : "border-border bg-card/70"
             }`}
           >
-            <p className="text-[15px] text-[#1D1D1F] dark:text-white">Drop a field here</p>
-            <p className="mt-1 text-[13px] text-[#86868B]">
+            <p className="text-[13px] text-foreground">Drop a field here</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
               Or click a component in the library to add it
             </p>
           </div>
@@ -67,7 +67,7 @@ export function FormCanvas() {
         <button
           type="button"
           onClick={() => addField("text")}
-          className="flex h-9 items-center justify-center gap-2 rounded-[10px] border border-dashed border-[#D2D2D7] text-[12px] text-[#86868B] transition-colors duration-150 hover:border-[#007AFF] hover:text-[#007AFF]"
+          className="flex h-9 items-center justify-center gap-2 rounded-[8px] border border-dashed border-border text-[11px] text-muted-foreground transition-colors duration-150 hover:border-[#007AFF]/60 hover:text-[#007AFF]"
         >
           <Icon icon={PlusSignIcon} size={16} />
           Add question
@@ -83,10 +83,10 @@ export function FormCanvas() {
             }
           }}
           className={cn(
-            "mt-1 rounded-xl border bg-white p-4 text-left transition-colors dark:bg-[#1C1C1E]",
+            "mt-1 rounded-[10px] border bg-card p-4 text-left transition-colors",
             selectedFieldId === CONFIRMATION_ID
               ? "border-[#007AFF]"
-              : "border-[#E5E5EA] hover:border-[#C7C7CC] dark:border-white/10"
+              : "border-border/90 hover:border-foreground/20"
           )}
         >
           <div className="mb-4 flex items-center gap-3">
@@ -94,10 +94,10 @@ export function FormCanvas() {
               <Icon icon={Tick02Icon} size={15} />
             </span>
             <div>
-              <p className="text-[13px] font-medium text-[#1D1D1F] dark:text-white">
+              <p className="text-[12px] font-medium text-foreground">
                 Confirmation
               </p>
-              <p className="text-[12px] text-[#86868B]">Shown after submission</p>
+              <p className="text-[10px] text-muted-foreground">Shown after submission</p>
             </div>
           </div>
           <Input

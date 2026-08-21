@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import {
   Add01Icon,
   AnalyticsUpIcon,
+  ArrowRight01Icon,
   Copy01Icon,
   Delete02Icon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
 } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
-import { BrandMark } from "@/components/brand";
 import { Icon } from "@/components/icon";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFormsStore } from "@/lib/store/forms-store";
 import { relativeTime } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export function DashboardView() {
   const router = useRouter();
@@ -37,141 +38,159 @@ export function DashboardView() {
     router.push(`/builder/${form.id}`);
   }
 
+  const published = forms.filter((form) => form.published).length;
+
   return (
-    <div className="min-h-screen bg-[#FBFBFD] dark:bg-black">
-      <header className="flex h-14 items-center justify-between border-b border-[#E5E5EA] bg-white px-6 dark:border-white/10 dark:bg-[#1C1C1E]">
-        <BrandMark />
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button
-            onClick={handleCreate}
-            className="h-8 rounded-[8px] bg-[#007AFF] px-3 text-[13px] text-white hover:bg-[#0071E3]"
-          >
-            <Icon icon={Add01Icon} size={14} />
-            New form
-          </Button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-[28px] font-semibold tracking-tight text-[#1D1D1F] dark:text-white">
-            Forms
-          </h1>
-          <p className="mt-1 text-[15px] text-[#86868B]">
-            Design, preview, and publish beautiful forms.
-          </p>
-        </div>
-
-        {!hasHydrated ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-44 animate-pulse rounded-xl bg-white ring-1 ring-[#E5E5EA] dark:bg-[#1C1C1E] dark:ring-white/10"
-              />
-            ))}
+    <WorkspaceShell
+      active="forms"
+      eyebrow="Workspace"
+      title="Forms"
+      description="Build, publish, and understand every response."
+      actions={
+        <Button onClick={handleCreate} className="h-8 px-3 text-[12px]">
+          <Icon icon={Add01Icon} size={13} />
+          New form
+        </Button>
+      }
+    >
+      <section className="mb-5 grid grid-cols-3 divide-x divide-border/70 rounded-[10px] border border-border/80 bg-card">
+        {[
+          { label: "Total", value: forms.length },
+          { label: "Published", value: published },
+          { label: "Drafts", value: forms.length - published },
+        ].map((stat) => (
+          <div key={stat.label} className="px-4 py-3">
+            <p className="text-[10px] font-medium text-muted-foreground">{stat.label}</p>
+            <p className="mt-0.5 text-[18px] font-semibold tracking-tight">{stat.value}</p>
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#D2D2D7] bg-white text-[#86868B] transition-colors duration-150 hover:border-[#007AFF] hover:text-[#007AFF] dark:border-white/15 dark:bg-[#1C1C1E]"
+        ))}
+      </section>
+
+      <div className="mb-2 flex items-center justify-between px-1">
+        <p className="text-[11px] font-medium text-muted-foreground">Recent forms</p>
+        <p className="text-[10px] text-muted-foreground">Updated automatically</p>
+      </div>
+
+      {!hasHydrated ? (
+        <div className="overflow-hidden rounded-[10px] border border-border/80 bg-card">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-[68px] animate-pulse border-b border-border/60 bg-muted/35 last:border-0"
+            />
+          ))}
+        </div>
+      ) : forms.length === 0 ? (
+        <button
+          type="button"
+          onClick={handleCreate}
+          className="flex w-full items-center justify-between rounded-[10px] border border-dashed border-border bg-card px-4 py-5 text-left transition-colors hover:border-[#007AFF]/50 hover:bg-[#007AFF]/[0.02]"
+        >
+          <span>
+            <span className="block text-[13px] font-medium">Create your first form</span>
+            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+              Start with a blank canvas and add fields as you go.
+            </span>
+          </span>
+          <Icon icon={ArrowRight01Icon} size={15} className="text-muted-foreground" />
+        </button>
+      ) : (
+        <section className="overflow-hidden rounded-[10px] border border-border/80 bg-card">
+          {forms.map((form) => (
+            <article
+              key={form.id}
+              className="group grid min-h-[68px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border/65 px-3 transition-colors last:border-0 hover:bg-muted/35 sm:grid-cols-[minmax(0,1fr)_110px_110px_32px]"
             >
-              <Icon icon={Add01Icon} size={22} />
-              <span className="text-[15px]">Create a form</span>
-            </button>
-            {forms.map((form) => (
-              <article
-                key={form.id}
-                className="group flex min-h-44 flex-col rounded-xl border border-[#E5E5EA] bg-white p-5 transition-all duration-150 hover:border-[#C7C7CC] dark:border-white/10 dark:bg-[#1C1C1E]"
+              <Link
+                href={`/builder/${form.id}`}
+                className="flex min-w-0 items-center gap-3 py-3"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <Link href={`/builder/${form.id}`} className="min-w-0">
-                    <h2 className="truncate text-[15px] font-semibold text-[#1D1D1F] dark:text-white">
-                      {form.title}
-                    </h2>
-                    <p className="mt-1 line-clamp-2 text-[13px] text-[#86868B]">
-                      {form.description || "No description"}
-                    </p>
-                  </Link>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 rounded-[8px] text-[#86868B]"
-                        />
-                      }
-                    >
-                      <Icon icon={MoreHorizontalIcon} size={16} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => router.push(`/builder/${form.id}`)}>
-                        <Icon icon={PencilEdit01Icon} size={14} />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push(`/analytics/${form.id}`)}>
-                        <Icon icon={AnalyticsUpIcon} size={14} />
-                        Analytics
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          const copy = duplicateForm(form.id);
-                          if (copy) {
-                            toast.success("Form duplicated");
-                            router.push(`/builder/${copy.id}`);
-                          }
-                        }}
-                      >
-                        <Icon icon={Copy01Icon} size={14} />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => {
-                          deleteForm(form.id);
-                          toast.success("Form deleted");
-                        }}
-                      >
-                        <Icon icon={Delete02Icon} size={14} />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="mt-auto flex items-center justify-between pt-6 text-[12px] text-[#86868B]">
-                  <span>
-                    {form.fields.length} field{form.fields.length === 1 ? "" : "s"}
+                <span
+                  className={cn(
+                    "h-8 w-1 shrink-0 rounded-full",
+                    form.published ? "bg-[#34C759]" : "bg-border"
+                  )}
+                />
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-medium">
+                    {form.title}
                   </span>
-                  <span className={form.published ? "text-[#34C759]" : ""}>
-                    {form.published ? "Published" : "Draft"}
+                  <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
+                    {form.description || "No description"}
                   </span>
-                  <span>{relativeTime(form.updatedAt)}</span>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="h-8 flex-1 rounded-[8px] text-[13px]"
-                    onClick={() => router.push(`/builder/${form.id}`)}
-                  >
+                </span>
+              </Link>
+
+              <div className="hidden sm:block">
+                <p className="text-[11px]">{form.fields.length} fields</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {form.displayMode === "classic" ? "All at once" : "One at a time"}
+                </p>
+              </div>
+
+              <div className="hidden sm:block">
+                <p
+                  className={cn(
+                    "text-[11px]",
+                    form.published ? "text-[#248A3D]" : "text-muted-foreground"
+                  )}
+                >
+                  {form.published ? "Published" : "Draft"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {relativeTime(form.updatedAt)}
+                </p>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-muted-foreground opacity-70 group-hover:opacity-100"
+                    />
+                  }
+                >
+                  <Icon icon={MoreHorizontalIcon} size={14} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push(`/builder/${form.id}`)}>
+                    <Icon icon={PencilEdit01Icon} size={13} />
                     Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-8 flex-1 rounded-[8px] text-[13px]"
-                    onClick={() => router.push(`/analytics/${form.id}`)}
-                  >
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push(`/analytics/${form.id}`)}>
+                    <Icon icon={AnalyticsUpIcon} size={13} />
                     Insights
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const copy = duplicateForm(form.id);
+                      if (copy) {
+                        toast.success("Form duplicated");
+                        router.push(`/builder/${copy.id}`);
+                      }
+                    }}
+                  >
+                    <Icon icon={Copy01Icon} size={13} />
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      deleteForm(form.id);
+                      toast.success("Form deleted");
+                    }}
+                  >
+                    <Icon icon={Delete02Icon} size={13} />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </article>
+          ))}
+        </section>
+      )}
+    </WorkspaceShell>
   );
 }

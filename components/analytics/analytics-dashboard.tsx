@@ -13,13 +13,12 @@ import {
 } from "recharts";
 import { format, subDays } from "date-fns";
 import {
-  ArrowLeft01Icon,
   Download04Icon,
+  Edit02Icon,
   FilterHorizontalIcon,
 } from "@hugeicons/core-free-icons";
-import { BrandMark } from "@/components/brand";
 import { Icon } from "@/components/icon";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFormsStore } from "@/lib/store/forms-store";
@@ -46,18 +45,19 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
     [allVisits, formId]
   );
 
-  const chartData = useMemo(() => {
-    const days = Array.from({ length: 14 }, (_, index) => {
-      const date = subDays(new Date(), 13 - index);
-      const key = format(date, "yyyy-MM-dd");
-      return {
-        key,
-        label: format(date, "MMM d"),
-        responses: submissions.filter((item) => item.submittedAt.startsWith(key)).length,
-      };
-    });
-    return days;
-  }, [submissions]);
+  const chartData = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, index) => {
+        const date = subDays(new Date(), 13 - index);
+        const key = format(date, "yyyy-MM-dd");
+        return {
+          key,
+          label: format(date, "MMM d"),
+          responses: submissions.filter((item) => item.submittedAt.startsWith(key)).length,
+        };
+      }),
+    [submissions]
+  );
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -92,185 +92,197 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
 
   if (ready && !form) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#FBFBFD] text-[#86868B]">
+      <div className="grid min-h-dvh place-items-center bg-background text-[12px] text-muted-foreground">
         This form could not be found.
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FBFBFD] dark:bg-black">
-      <header className="flex h-14 items-center justify-between border-b border-[#E5E5EA] bg-white px-6 dark:border-white/10 dark:bg-[#1C1C1E]">
-        <div className="flex items-center gap-3">
+    <WorkspaceShell
+      active="analytics"
+      formId={formId}
+      eyebrow="Insights"
+      title={form?.title || "Loading…"}
+      description="Response activity and completion health."
+      actions={
+        form ? (
           <Link
-            href="/"
-            className="grid size-8 place-items-center rounded-[8px] hover:bg-black/5 dark:hover:bg-white/10"
-            aria-label="Back to dashboard"
+            href={`/builder/${form.id}`}
+            className={cn(buttonVariants({ variant: "outline" }), "h-8 text-[12px]")}
           >
-            <Icon icon={ArrowLeft01Icon} size={18} />
+            <Icon icon={Edit02Icon} size={13} />
+            Edit form
           </Link>
-          <BrandMark />
-        </div>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          {form ? (
-            <Link
-              href={`/builder/${form.id}`}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "h-8 rounded-[8px] text-[13px]"
-              )}
-            >
-              Edit form
-            </Link>
-          ) : null}
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-8">
-          <p className="text-[13px] text-[#86868B]">Analytics</p>
-          <h1 className="mt-1 text-[28px] font-semibold tracking-tight text-[#1D1D1F] dark:text-white">
-            {form?.title || "Loading..."}
-          </h1>
-        </div>
-
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          {[
-            { label: "Total responses", value: submissions.length },
-            { label: "Visits", value: visits.length },
-            { label: "Completion rate", value: `${completionRate}%` },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-[#E5E5EA] bg-white px-5 py-4 dark:border-white/10 dark:bg-[#1C1C1E]"
-            >
-              <p className="text-[13px] text-[#86868B]">{stat.label}</p>
-              <p className="mt-2 text-[28px] font-semibold tracking-tight text-[#1D1D1F] dark:text-white">
-                {stat.value}
-              </p>
+        ) : null
+      }
+    >
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+        <section className="rounded-[10px] border border-border/80 bg-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[12px] font-medium">Response activity</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">Last 14 days</p>
             </div>
-          ))}
-        </div>
-
-        <div className="mb-6 rounded-xl border border-[#E5E5EA] bg-white p-5 dark:border-white/10 dark:bg-[#1C1C1E]">
-          <p className="mb-4 text-[13px] text-[#86868B]">Submissions over time</p>
-          <div className="h-64">
+            <span className="rounded-full bg-[#007AFF]/8 px-2 py-1 text-[10px] font-medium text-[#007AFF]">
+              {submissions.length} total
+            </span>
+          </div>
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: -24 }}>
                 <defs>
                   <linearGradient id="ffFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.25} />
+                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.2} />
                     <stop offset="100%" stopColor="#007AFF" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#E5E5EA" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: "#86868B", fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fill: "#86868B", fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: "#86868B", fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={24}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fill: "#86868B", fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <RechartsTooltip
+                  cursor={{ stroke: "#007AFF", strokeOpacity: 0.2 }}
                   contentStyle={{
-                    borderRadius: 12,
-                    border: "1px solid #E5E5EA",
-                    fontSize: 13,
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "var(--popover)",
+                    color: "var(--popover-foreground)",
+                    fontSize: 11,
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey="responses"
                   stroke="#007AFF"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   fill="url(#ffFill)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        </section>
+
+        <aside className="overflow-hidden rounded-[10px] border border-border/80 bg-card">
+          <div className="border-b border-border/70 px-4 py-3">
+            <p className="text-[12px] font-medium">Response health</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">Live browser data</p>
+          </div>
+          {[
+            { label: "Responses", value: submissions.length, detail: "Completed forms" },
+            { label: "Visits", value: visits.length, detail: "Public form opens" },
+            {
+              label: "Completion",
+              value: `${completionRate}%`,
+              detail: "Responses ÷ visits",
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="flex items-center justify-between border-b border-border/60 px-4 py-3 last:border-0"
+            >
+              <div>
+                <p className="text-[11px] font-medium">{stat.label}</p>
+                <p className="text-[10px] text-muted-foreground">{stat.detail}</p>
+              </div>
+              <p className="text-[18px] font-semibold tracking-tight">{stat.value}</p>
+            </div>
+          ))}
+        </aside>
+      </div>
+
+      <section className="mt-4 overflow-hidden rounded-[10px] border border-border/80 bg-card">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/70 p-3">
+          <div className="relative min-w-52 flex-1">
+            <Icon
+              icon={FilterHorizontalIcon}
+              size={13}
+              className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Filter responses"
+              className="h-8 pl-8 text-[11px]"
+            />
+          </div>
+          <div className="flex rounded-[8px] bg-muted p-0.5">
+            {(["newest", "oldest"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSort(value)}
+                className={cn(
+                  "h-7 rounded-[6px] px-2.5 text-[10px] capitalize transition-colors",
+                  sort === value
+                    ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                    : "text-muted-foreground"
+                )}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+          <Button variant="outline" className="h-8 text-[11px]" onClick={exportCsv}>
+            <Icon icon={Download04Icon} size={13} />
+            Export
+          </Button>
         </div>
 
-        <div className="rounded-xl border border-[#E5E5EA] bg-white dark:border-white/10 dark:bg-[#1C1C1E]">
-          <div className="flex flex-wrap items-center gap-3 border-b border-[#E5E5EA] px-5 py-4 dark:border-white/10">
-            <div className="relative min-w-56 flex-1">
-              <Icon
-                icon={FilterHorizontalIcon}
-                size={14}
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#86868B]"
-              />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Filter responses"
-                className="h-9 rounded-xl pl-9 text-[13px]"
-              />
-            </div>
-            <div className="flex rounded-xl bg-[#F5F5F7] p-1 dark:bg-white/10">
-              {(["newest", "oldest"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSort(value)}
-                  className={cn(
-                    "h-7 rounded-[8px] px-3 text-[13px] capitalize transition-all duration-150",
-                    sort === value
-                      ? "bg-white text-[#1D1D1F] shadow-sm dark:bg-[#2C2C2E] dark:text-white"
-                      : "text-[#86868B]"
-                  )}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              className="h-8 rounded-[8px] text-[13px]"
-              onClick={exportCsv}
-            >
-              <Icon icon={Download04Icon} size={14} />
-              Export CSV
-            </Button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-[13px]">
-              <thead className="text-[#86868B]">
-                <tr className="border-b border-[#E5E5EA] dark:border-white/10">
-                  <th className="px-5 py-3 font-normal">Submitted</th>
-                  {form?.fields.map((field) => (
-                    <th key={field.id} className="px-5 py-3 font-normal">
-                      {field.label}
-                    </th>
-                  ))}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-[11px]">
+            <thead className="bg-muted/45 text-muted-foreground">
+              <tr className="border-b border-border/70">
+                <th className="px-4 py-2 font-medium">Submitted</th>
+                {form?.fields.map((field) => (
+                  <th key={field.id} className="px-4 py-2 font-medium">
+                    {field.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={(form?.fields.length ?? 0) + 1}
+                    className="px-4 py-10 text-center text-muted-foreground"
+                  >
+                    No responses yet.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={(form?.fields.length ?? 0) + 1}
-                      className="px-5 py-10 text-center text-[#86868B]"
-                    >
-                      No responses yet.
+              ) : (
+                filtered.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-border/55 transition-colors last:border-0 hover:bg-muted/30"
+                  >
+                    <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {formatDateTime(item.submittedAt)}
                     </td>
-                  </tr>
-                ) : (
-                  filtered.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-[#E5E5EA] last:border-0 dark:border-white/10"
-                    >
-                      <td className="px-5 py-3 whitespace-nowrap text-[#86868B]">
-                        {formatDateTime(item.submittedAt)}
+                    {form?.fields.map((field) => (
+                      <td key={field.id} className="max-w-52 truncate px-4 py-2.5">
+                        {formatFieldValue(item.data[field.id])}
                       </td>
-                      {form?.fields.map((field) => (
-                        <td key={field.id} className="px-5 py-3 text-[#1D1D1F] dark:text-white">
-                          {formatFieldValue(item.data[field.id])}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </main>
-    </div>
+      </section>
+    </WorkspaceShell>
   );
 }

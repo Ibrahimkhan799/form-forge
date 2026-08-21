@@ -45,17 +45,17 @@ export function ShareDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl p-6 sm:max-w-md">
+      <DialogContent className="max-w-md p-4 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share and publish</DialogTitle>
           <DialogDescription>
             Publishing makes this form available at a public link.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center justify-between rounded-xl bg-[#F5F5F7] px-3 py-3 dark:bg-white/5">
+        <div className="flex items-center justify-between rounded-[8px] bg-muted px-3 py-2.5">
           <div>
-            <p className="text-[13px] text-[#1D1D1F] dark:text-white">Published</p>
-            <p className="text-[12px] text-[#86868B]">Anyone with the link can respond</p>
+            <p className="text-[12px] text-foreground">Published</p>
+            <p className="text-[10px] text-muted-foreground">Anyone with the link can respond</p>
           </div>
           <Switch
             checked={form.published}
@@ -73,9 +73,9 @@ export function ShareDialog({
               size={14}
               className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[#86868B]"
             />
-            <Input readOnly value={url} className="h-9 rounded-xl pl-9 text-[13px]" />
+            <Input readOnly value={url} className="h-8 pl-8 text-[11px]" />
           </div>
-          <Button onClick={copyLink} className="h-9 rounded-[8px] bg-[#007AFF] text-white hover:bg-[#0071E3]">
+          <Button onClick={copyLink} className="h-8">
             <Icon icon={copied ? CheckmarkCircle02Icon : Copy01Icon} size={14} />
             Copy
           </Button>

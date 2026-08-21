@@ -130,7 +130,7 @@ export function BuilderShell({ formId }: { formId: string }) {
       onDragEnd={handleDragEnd}
       onDragCancel={clearDragPreview}
     >
-      <div className="fixed inset-0 flex h-dvh w-screen flex-col overflow-hidden bg-[#FBFBFD] dark:bg-black">
+      <div className="fixed inset-0 flex h-dvh w-screen flex-col overflow-hidden bg-background">
         <CanvasHeader />
         <AnimatePresence mode="wait">
           {mode === "preview" ? (
