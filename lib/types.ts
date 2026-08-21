@@ -49,6 +49,13 @@ export interface ComponentStyle {
   borderRadius?: number;
 }
 
+export interface StoredAssetRef {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+}
+
 export interface FormField {
   id: string;
   type: FieldType;
@@ -63,6 +70,7 @@ export interface FormField {
   randomizeOptions?: boolean;
   richText?: string;
   imageUrl?: string;
+  imageAsset?: StoredAssetRef;
   imageAlt?: string;
   imageCaption?: string;
   imageFit?: "cover" | "contain";
