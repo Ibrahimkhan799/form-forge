@@ -173,6 +173,56 @@
   background-clip: padding-box;
 }
 
+.scroll-area-viewport {
+  scrollbar-width: none;
+}
+
+.scroll-area-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-slider-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  outline: none;
+}
+
+.ui-slider-input::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+}
+
+.ui-slider-input::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid #007aff;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 25%);
+}
+
+.ui-slider-input::-moz-range-track {
+  height: 6px;
+  background: transparent;
+}
+
+.ui-slider-input::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #007aff;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 25%);
+}
+
+.ui-slider-input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(0 122 255 / 18%);
+}
+
 .rich-text-editor:empty::before {
   content: "Start writing…";
   color: var(--muted-foreground);
