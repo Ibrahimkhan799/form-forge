@@ -25,6 +25,7 @@ import { ThemeCustomizer } from "@/components/builder/theme-customizer";
 import { VersionHistory } from "@/components/builder/version-history";
 import { ShareDialog } from "@/components/builder/share-dialog";
 import { SchemaDialog } from "@/components/builder/schema-dialog";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useBuilderStore, useBuilderTemporal } from "@/lib/store/builder-store";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -170,6 +171,7 @@ export function CanvasHeader() {
         <HeaderButton label="JSON schema" onClick={() => setSchemaOpen(true)}>
           <Icon icon={SourceCodeIcon} size={16} />
         </HeaderButton>
+        <ThemeToggle />
         <Button
           variant="outline"
           onClick={() => setShareOpen(true)}
