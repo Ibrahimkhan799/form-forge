@@ -26,13 +26,17 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Supabase setup
 
 1. Create a Supabase project.
-2. Enable **Anonymous Sign-Ins** under Authentication → Providers.
+2. Enable **Email** and **Anonymous Sign-Ins** under Authentication → Providers.
 3. Run `supabase/schema.sql` in the SQL Editor.
 4. Add the project URL and publishable key to `.env.local`.
 
 When Supabase is not configured or temporarily unavailable, FormForge continues
 using localStorage and IndexedDB. Once configured, local forms are synchronized
 to Postgres and new assets are uploaded to Supabase Storage.
+
+Users can work as guests, upgrade the current guest workspace into an
+email/password account, sign into an existing account, sign out, and request a
+password reset from `/auth`.
 
 ## What is included
 

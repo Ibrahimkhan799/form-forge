@@ -29,6 +29,7 @@ import { VersionHistory } from "@/components/builder/version-history";
 import { ShareDialog } from "@/components/builder/share-dialog";
 import { SchemaDialog } from "@/components/builder/schema-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AccountMenu } from "@/components/auth/account-menu";
 import { useBuilderStore, useBuilderTemporal } from "@/lib/store/builder-store";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -227,6 +228,9 @@ export function CanvasHeader({
           />
         </HeaderButton>
         <ThemeToggle />
+        <div className="hidden lg:block">
+          <AccountMenu />
+        </div>
         <Button
           variant="outline"
           onClick={() => setShareOpen(true)}

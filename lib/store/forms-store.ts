@@ -30,6 +30,7 @@ interface FormsState {
   restoreVersion: (id: string, versionId: string) => FormDocument | undefined;
   syncRemote: () => Promise<void>;
   loadPublishedForm: (id: string) => Promise<FormDocument | undefined>;
+  resetForAccount: (includeDemo?: boolean) => void;
 }
 
 export const useFormsStore = create<FormsState>()(
@@ -144,6 +145,9 @@ export const useFormsStore = create<FormsState>()(
         } catch {
           return undefined;
         }
+      },
+      resetForAccount: (includeDemo = true) => {
+        set({ forms: includeDemo ? [createDemoForm()] : [] });
       },
     }),
     {

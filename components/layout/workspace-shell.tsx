@@ -9,6 +9,8 @@ import {
 import { BrandMark } from "@/components/brand";
 import { Icon } from "@/components/icon";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AccountMenu } from "@/components/auth/account-menu";
+import { useAuth } from "@/components/auth/auth-provider";
 import { cn } from "@/lib/utils";
 
 type WorkspaceSection = "forms" | "analytics";
@@ -30,6 +32,13 @@ export function WorkspaceShell({
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const auth = useAuth();
+  const workspaceLabel =
+    auth.configured && auth.user && !auth.isGuest
+      ? ((auth.user.user_metadata?.display_name as string | undefined) ??
+        auth.user.email ??
+        "Personal")
+      : "Guest workspace";
   const links = [
     {
       label: "Forms",
@@ -66,7 +75,9 @@ export function WorkspaceShell({
           <p className="text-[10px] font-medium tracking-wide text-muted-foreground">
             WORKSPACE
           </p>
-          <p className="mt-0.5 truncate text-[12px] font-medium">Personal</p>
+          <p className="mt-0.5 truncate text-[12px] font-medium">
+            {workspaceLabel}
+          </p>
         </div>
 
         <nav className="mt-3 space-y-0.5" aria-label="Workspace">
@@ -87,13 +98,8 @@ export function WorkspaceShell({
           ))}
         </nav>
 
-        <div className="mt-auto flex items-center justify-between border-t border-border/70 px-1 pt-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="grid size-6 place-items-center rounded-full bg-foreground text-[9px] font-medium text-background">
-              FF
-            </span>
-            <span className="truncate text-[11px] text-muted-foreground">FormForge</span>
-          </div>
+        <div className="mt-auto flex items-center justify-between gap-1 border-t border-border/70 px-1 pt-3">
+          <AccountMenu />
           <ThemeToggle />
         </div>
       </aside>
@@ -101,7 +107,10 @@ export function WorkspaceShell({
       <div className="min-w-0">
         <div className="flex h-12 items-center justify-between border-b border-border/70 px-4 md:hidden">
           <BrandMark />
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <AccountMenu />
+            <ThemeToggle />
+          </div>
         </div>
 
         <main className="mx-auto w-full max-w-[1180px] px-4 py-5 sm:px-6 sm:py-7">

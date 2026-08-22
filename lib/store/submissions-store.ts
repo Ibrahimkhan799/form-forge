@@ -22,6 +22,7 @@ interface SubmissionsState {
   getVisits: (formId: string) => FormVisit[];
   deleteSubmission: (id: string) => void;
   syncFormResponses: (formId: string) => Promise<void>;
+  resetForAccount: (includeDemo?: boolean) => void;
 }
 
 function daysAgo(days: number, hour = 12) {
@@ -128,6 +129,17 @@ export const useSubmissionsStore = create<SubmissionsState>()(
         } catch {
           // Keep local analytics available while Supabase is offline.
         }
+      },
+      resetForAccount: (includeDemo = true) => {
+        if (!includeDemo) {
+          set({ submissions: [], visits: [] });
+          return;
+        }
+        const next = seedDemoSubmissions();
+        set({
+          submissions: next.submissions,
+          visits: next.visits,
+        });
       },
     }),
     {

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { useFormsStore } from "@/lib/store/forms-store";
 import { useSubmissionsStore } from "@/lib/store/submissions-store";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 function PersistHydration() {
   useEffect(() => {
@@ -33,11 +34,13 @@ function PersistHydration() {
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider delay={200}>
-        <PersistHydration />
-        {children}
-        <Toaster position="bottom-right" />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider delay={200}>
+          <PersistHydration />
+          {children}
+          <Toaster position="bottom-right" />
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
