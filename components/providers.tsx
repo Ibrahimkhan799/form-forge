@@ -33,7 +33,7 @@ function PersistHydration() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <AuthProvider>
         <TooltipProvider delay={200}>
           <PersistHydration />

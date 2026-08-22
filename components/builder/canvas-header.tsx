@@ -228,9 +228,7 @@ export function CanvasHeader({
           />
         </HeaderButton>
         <ThemeToggle />
-        <div className="hidden lg:block">
-          <AccountMenu />
-        </div>
+        <AccountMenu className="w-auto" />
         <Button
           variant="outline"
           onClick={() => setShareOpen(true)}

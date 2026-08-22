@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Icon } from "@/components/icon";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,17 +18,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function AccountMenu() {
+export function AccountMenu({ className }: { className?: string }) {
   const auth = useAuth();
 
   if (!auth.configured || auth.isGuest || !auth.user) {
     return (
       <Link
         href="/auth"
-        className="flex h-7 items-center gap-1.5 rounded-[7px] px-2 text-[10px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "h-7 w-auto justify-center px-2.5 text-[11px]",
+          className
+        )}
       >
-        <Icon icon={Login01Icon} size={12} />
+        <Icon icon={Login01Icon} size={13} />
         Sign in
       </Link>
     );

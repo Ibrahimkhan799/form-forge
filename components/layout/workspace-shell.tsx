@@ -78,6 +78,9 @@ export function WorkspaceShell({
           <p className="mt-0.5 truncate text-[12px] font-medium">
             {workspaceLabel}
           </p>
+          <div className="mt-2">
+            <AccountMenu className="w-full" />
+          </div>
         </div>
 
         <nav className="mt-3 space-y-0.5" aria-label="Workspace">
@@ -98,8 +101,7 @@ export function WorkspaceShell({
           ))}
         </nav>
 
-        <div className="mt-auto flex items-center justify-between gap-1 border-t border-border/70 px-1 pt-3">
-          <AccountMenu />
+        <div className="mt-auto flex items-center justify-end gap-1 border-t border-border/70 px-1 pt-3">
           <ThemeToggle />
         </div>
       </aside>

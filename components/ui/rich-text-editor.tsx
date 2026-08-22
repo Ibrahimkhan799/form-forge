@@ -58,6 +58,7 @@ export function RichTextEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
+        underline: false,
         link: {
           openOnClick: false,
           autolink: true,
