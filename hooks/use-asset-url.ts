@@ -20,7 +20,14 @@ export function useAssetUrl(asset?: StoredAssetRef) {
       return () => cancelAnimationFrame(frame);
     }
 
-    getStoredUpload(asset.id)
+    if (asset.url) {
+      const frame = requestAnimationFrame(() =>
+        setState({ loading: false, url: asset.url })
+      );
+      return () => cancelAnimationFrame(frame);
+    }
+
+    getStoredUpload(asset)
       .then((record) => {
         if (!active) return;
         if (!record) {
@@ -40,5 +47,5 @@ export function useAssetUrl(asset?: StoredAssetRef) {
     };
   }, [asset]);
 
-  return state;
+  return asset?.url ? { loading: false, url: asset.url } : state;
 }

@@ -146,31 +146,47 @@
 
 .editor-scrollbar {
   scrollbar-width: auto;
-  scrollbar-color: color-mix(in srgb, var(--foreground) 34%, transparent)
-    color-mix(in srgb, var(--muted) 75%, transparent);
+  scrollbar-color: #5f6368 #e8e8e5;
   scrollbar-gutter: stable;
 }
 
 .editor-scrollbar::-webkit-scrollbar {
-  width: 10px;
+  width: 14px;
 }
 
 .editor-scrollbar::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--muted) 75%, transparent);
-  border-left: 1px solid var(--border);
+  background: #e8e8e5;
+  border-left: 1px solid #c8c8c4;
 }
 
 .editor-scrollbar::-webkit-scrollbar-thumb {
   min-height: 36px;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--foreground) 34%, transparent);
+  background: #5f6368;
   background-clip: padding-box;
 }
 
 .editor-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--foreground) 50%, transparent);
+  background: #34373b;
   background-clip: padding-box;
+}
+
+.dark .editor-scrollbar {
+  scrollbar-color: #f2f2f2 #111111;
+}
+
+.dark .editor-scrollbar::-webkit-scrollbar-track {
+  background: #111111;
+  border-left-color: #424242;
+}
+
+.dark .editor-scrollbar::-webkit-scrollbar-thumb {
+  background: #f2f2f2;
+}
+
+.dark .editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
 }
 
 .scroll-area-viewport {

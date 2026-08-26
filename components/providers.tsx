@@ -6,10 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { useFormsStore } from "@/lib/store/forms-store";
 import { useSubmissionsStore } from "@/lib/store/submissions-store";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 function PersistHydration() {
   useEffect(() => {
-    const finishForms = () => useFormsStore.getState().setHasHydrated(true);
+    const finishForms = () => {
+      useFormsStore.getState().setHasHydrated(true);
+      void useFormsStore.getState().syncRemote();
+    };
     const finishSubmissions = () => useSubmissionsStore.getState().setHasHydrated(true);
 
     const unsubForms = useFormsStore.persist.onFinishHydration(finishForms);
@@ -29,12 +33,14 @@ function PersistHydration() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider delay={200}>
-        <PersistHydration />
-        {children}
-        <Toaster position="bottom-right" />
-      </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+      <AuthProvider>
+        <TooltipProvider delay={200}>
+          <PersistHydration />
+          {children}
+          <Toaster position="bottom-right" />
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { FormPlayer } from "@/components/renderer/form-player";
 import { useFormsStore } from "@/lib/store/forms-store";
@@ -13,8 +13,21 @@ export default function PublicFormPage({
   const { formId } = use(params);
   const hasHydrated = useFormsStore((state) => state.hasHydrated);
   const form = useFormsStore((state) => state.forms.find((item) => item.id === formId));
+  const loadPublishedForm = useFormsStore((state) => state.loadPublishedForm);
+  const [remoteChecked, setRemoteChecked] = useState(false);
 
-  if (!hasHydrated) {
+  useEffect(() => {
+    if (!hasHydrated || form) return;
+    let active = true;
+    loadPublishedForm(formId).finally(() => {
+      if (active) setRemoteChecked(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [form, formId, hasHydrated, loadPublishedForm]);
+
+  if (!hasHydrated || (!form && !remoteChecked)) {
     return (
       <div className="grid min-h-screen place-items-center bg-[#FBFBFD] text-[#86868B]">
         Loading form...

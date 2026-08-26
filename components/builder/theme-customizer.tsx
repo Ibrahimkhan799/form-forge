@@ -22,7 +22,6 @@ import {
   type RightPanelView,
 } from "@/components/builder/right-panel-tabs";
 import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 const SWATCHES = [
@@ -157,7 +156,7 @@ export function AppearancePanel({
   if (!theme) return null;
 
   return (
-    <aside className="flex h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
+    <aside className="flex h-full min-h-0 w-[22rem] max-w-[calc(100vw-24px)] shrink-0 flex-col overflow-hidden border-l border-border/80 bg-card shadow-[-4px_0_18px_rgba(0,0,0,0.04)] lg:shadow-none">
       <div className="space-y-3 border-b border-border/70 px-3 py-3">
         <RightPanelTabs value="appearance" onChange={onViewChange} />
         <div className="flex items-center justify-between px-1">
@@ -168,8 +167,8 @@ export function AppearancePanel({
         </div>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="space-y-5 px-4 py-4 pr-5">
+      <div className="editor-scrollbar h-0 min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
+        <div className="space-y-5 px-4 pt-4 pr-8 pb-24">
           <Section title="Accent" description="Used for actions, focus, and selection.">
             <div className="flex flex-wrap items-center gap-2">
               {SWATCHES.map((color) => (
@@ -306,7 +305,7 @@ export function AppearancePanel({
             </div>
           </Section>
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="flex items-center justify-between border-t border-border/70 bg-card px-4 py-2.5">
         <p className="text-[10px] text-muted-foreground">Changes autosave</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Area,
@@ -33,10 +33,17 @@ export function AnalyticsDashboard({ formId }: { formId: string }) {
   const submissionsHydrated = useSubmissionsStore((state) => state.hasHydrated);
   const allSubmissions = useSubmissionsStore((state) => state.submissions);
   const allVisits = useSubmissionsStore((state) => state.visits);
+  const syncFormResponses = useSubmissionsStore(
+    (state) => state.syncFormResponses
+  );
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
 
   const ready = hasHydrated && submissionsHydrated;
+
+  useEffect(() => {
+    void syncFormResponses(formId);
+  }, [formId, syncFormResponses]);
   const submissions = useMemo(
     () => allSubmissions.filter((item) => item.formId === formId),
     [allSubmissions, formId]

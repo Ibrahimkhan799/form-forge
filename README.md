@@ -1,6 +1,7 @@
 # FormForge
 
-A high-performance no-code form builder inspired by Typeform, Google Forms, and Webflow. The interface follows a minimal Apple-inspired system: white cards, `#FBFBFD` page surfaces, `#007AFF` as the only accent, and 12px corners.
+A compact no-code form builder with conversational and classic form layouts,
+content layers, rich text, theming, uploads, and response analytics.
 
 ## Stack
 
@@ -10,25 +11,43 @@ A high-performance no-code form builder inspired by Typeform, Google Forms, and 
 - React Hook Form + Zod
 - @dnd-kit for drag and drop
 - Framer Motion, Recharts, Hugeicons, next-themes
+- Supabase Postgres, Auth, and Storage with offline local fallback
 
 ## Run locally
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Supabase setup
+
+1. Create a Supabase project.
+2. Enable **Email** and **Anonymous Sign-Ins** under Authentication → Providers.
+3. Run `supabase/schema.sql` in the SQL Editor.
+4. Add the project URL and publishable key to `.env.local`.
+
+When Supabase is not configured or temporarily unavailable, FormForge continues
+using localStorage and IndexedDB. Once configured, local forms are synchronized
+to Postgres and new assets are uploaded to Supabase Storage.
+
+Users can work as guests, upgrade the current guest workspace into an
+email/password account, sign into an existing account, sign out, and request a
+password reset from `/auth`.
+
 ## What is included
 
 - Visual builder with a component library, canvas, and inspector
-- Ten field types, including rating and file upload
+- Ten answer fields plus Image and Rich Text content layers
 - Undo/redo (`⌘Z` / `⇧⌘Z`), delete selected field, Escape to deselect
 - Debounced autosave to `localStorage`
-- Form theme engine (accent, radius, font, background style)
+- Form theme engine with separate body/heading Google Fonts
 - Version snapshots and JSON Schema import/export
 - Public Typeform-style player at `/f/[formId]`
 - Analytics dashboard with completion rate, time series, and CSV export
 
-Forms and submissions persist in the browser. A demo **Product feedback** form is seeded on first load.
+Forms, submissions, visits, and uploads sync with Supabase when configured. A
+demo **Product feedback** form is seeded on first load.

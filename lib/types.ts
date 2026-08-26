@@ -54,6 +54,9 @@ export interface StoredAssetRef {
   name: string;
   size: number;
   type: string;
+  storage?: "indexeddb" | "supabase";
+  path?: string;
+  url?: string;
 }
 
 export interface FormField {
